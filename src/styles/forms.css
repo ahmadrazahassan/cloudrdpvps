@@ -1,0 +1,126 @@
+/* ------------------------------------------------------------------
+   Form controls — flat. Transparent fields with a hairline outline, 10px radius
+   (same as buttons). No filled panels, no gradients, no shadows.
+------------------------------------------------------------------- */
+@layer components {
+  .field {
+    display: block;
+  }
+  .field-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .field-input,
+  .field-textarea {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--color-line-2);
+    border-radius: var(--radius-btn);
+    background: transparent;
+    color: var(--color-ink);
+    font: inherit;
+    font-size: 16px; /* never below 16px: iOS zooms smaller inputs */
+    line-height: 1.4;
+    transition: border-color 0.15s ease;
+  }
+  .field-input {
+    height: 48px;
+    padding: 0 14px;
+  }
+  .field-textarea {
+    min-height: 120px;
+    padding: 12px 14px;
+    resize: vertical;
+  }
+  .field-input::placeholder,
+  .field-textarea::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
+  }
+  .field-input:hover,
+  .field-textarea:hover {
+    border-color: var(--color-muted);
+  }
+  .field-input:focus,
+  .field-textarea:focus {
+    border-color: var(--color-lav-600);
+    outline: 2px solid var(--color-lav-500);
+    outline-offset: 1px;
+  }
+  .field-input[aria-invalid="true"],
+  .field-textarea[aria-invalid="true"] {
+    border-color: var(--color-bad);
+  }
+  .field-input:disabled,
+  .field-textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  /* Browsers paint autofill with their own fill; paint it with the page colour instead. */
+  .field-input:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-ink);
+    box-shadow: 0 0 0 1000px var(--color-bg) inset;
+    transition: background-color 9999s ease-out;
+  }
+  .field-hint {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+  .field-error {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-bad);
+  }
+
+  /* Checkbox row */
+  .check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+  }
+  .check input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--color-lav-600);
+  }
+
+  /* Form-level message: a coloured left rule, no filled box */
+  .form-note {
+    border-left: 2px solid var(--color-line-2);
+    padding: 2px 0 2px 12px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--color-ink-2);
+  }
+  .form-note[data-tone="error"] {
+    border-left-color: var(--color-bad);
+    color: var(--color-bad);
+  }
+  .form-note[data-tone="ok"] {
+    border-left-color: var(--color-ok);
+    color: var(--color-ok);
+  }
+
+  .text-link {
+    color: var(--color-lav-700);
+    text-decoration: underline;
+    text-decoration-color: var(--color-lav-300);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s ease;
+  }
+  .text-link:hover {
+    text-decoration-color: var(--color-lav-700);
+  }
+}

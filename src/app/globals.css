@@ -1,0 +1,538 @@
+/* Scan application source only; generated builds can contain arbitrary binary-like class strings. */
+@import "tailwindcss" source("../");
+@import "../styles/buttons.css";
+@import "../styles/forms.css";
+
+/* ------------------------------------------------------------------
+   Design tokens — see prompts/01-homepage-and-design-system.md §4
+   Global page background is #F1F1F1 (mandatory). Lavender is the only
+   brand hue. No gradients anywhere except src/styles/buttons.css.
+------------------------------------------------------------------- */
+@theme {
+  /* surfaces */
+  --color-bg: #f1f1f1;
+  --color-surface: #ffffff;
+  --color-surface-2: #f7f7f8;
+  --color-line: #e2e2e6;
+  --color-line-2: #d2d2d8;
+
+  /* text */
+  --color-ink: #121214;
+  --color-ink-2: #3f3f46;
+  --color-muted: #666670;
+
+  /* lavender (primary) */
+  --color-lav-50: #f6f2fe;
+  --color-lav-100: #ede5fc;
+  --color-lav-200: #dccdf8;
+  --color-lav-300: #c6aef3;
+  --color-lav-400: #ae8cec;
+  --color-lav-500: #9468e0;
+  --color-lav-600: #7c4fcf;
+  --color-lav-700: #6439ae;
+  --color-lav-800: #4c2b85;
+  --color-lav-900: #331d5c;
+
+  /* status */
+  --color-ok: #17704a; /* 5.6:1 on the page, so small status text passes WCAG AA */
+  --color-ok-bg: #e6f4ec;
+  --color-warn: #955500; /* 5.2:1 on the page */
+  --color-warn-bg: #fbf0dc;
+  --color-bad: #c23b3b;
+  --color-bad-bg: #fbe7e7;
+  --color-bad-soft: #f4a8a8; /* error text on the dark footer (8:1 on ink) */
+
+  /* shape */
+  --radius-btn: 10px;
+  --radius-card: 14px;
+  --radius-panel: 20px;
+  --radius-badge: 6px;
+
+  /* elevation (neutral, soft) */
+  --shadow-1: 0 1px 2px rgb(18 18 20 / 0.06);
+  --shadow-2: 0 8px 24px -12px rgb(18 18 20 / 0.18);
+
+  --container-site: 1240px;
+}
+
+/* ------------------------------------------------------------------
+   Typography — two families, nothing else (loaded in app/layout.tsx):
+     Inter Tight  → display, headings, prices, wordmark   (font-display)
+     Inter        → body, UI, labels, data                (font-sans)
+   `--font-*: initial` clears Tailwind's built-in serif and monospace stacks, so a
+   leftover serif/mono utility can never silently render a system font.
+
+   Weights (variable fonts, so any value works — these are the ones we use):
+     400 body · 500 UI, labels, display · 600 headings, buttons, prices · 700 wordmark only
+   Tracking follows size: the bigger the type, the tighter it sits (Inter's own
+   "dynamic metrics" curve: ≈ −0.011em at 16px, −0.02em at 24px, −0.03em+ for display).
+------------------------------------------------------------------- */
+@theme inline {
+  --font-*: initial;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  background: var(--color-bg);
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+  /* Admin table density: compact by default, "comfortable" via the toggle (html[data-density]). */
+  --row-h: 36px;
+}
+html[data-density="comfortable"] {
+  --row-h: 48px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.011em;
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  font-feature-settings: "calt" 1, "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  text-size-adjust: 100%;
+}
+
+@layer base {
+  /* Headings are Inter Tight by default; utilities (text-xl, font-medium…) still win. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  h1 {
+    letter-spacing: -0.028em;
+  }
+  h2 {
+    letter-spacing: -0.024em;
+  }
+  h3 {
+    letter-spacing: -0.018em;
+  }
+  h4,
+  h5,
+  h6 {
+    letter-spacing: -0.012em;
+  }
+  /* No one-word last lines in running text. */
+  p,
+  li,
+  dd,
+  blockquote {
+    text-wrap: pretty;
+  }
+  /* Inputs inherit the page's type instead of the browser's. */
+  input,
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+    letter-spacing: inherit;
+  }
+}
+
+::selection {
+  background: var(--color-lav-200);
+  color: var(--color-lav-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-lav-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Reusable type & layout primitives
+------------------------------------------------------------------- */
+@layer components {
+  .container-site {
+    width: 100%;
+    max-width: var(--container-site);
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 640px) {
+    .container-site {
+      padding-inline: 24px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-site {
+      padding-inline: 32px;
+    }
+  }
+
+  .section-pad {
+    padding-block: 64px;
+  }
+  @media (min-width: 768px) {
+    .section-pad {
+      padding-block: 88px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .section-pad {
+      padding-block: 120px;
+    }
+  }
+
+  /* Small uppercase label (section eyebrows, table heads, tags): Inter 500, tracked out. */
+  .label-caps {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .display-xl {
+    font-family: var(--font-display);
+    font-weight: 450;
+    font-size: clamp(44px, 7vw, 92px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+
+  /* Page title for interior pages (the homepage hero uses .display-xl). */
+  .display-h1 {
+    font-family: var(--font-display);
+    font-weight: 450;
+    font-size: clamp(38px, 5.4vw, 66px);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+
+  .display-h2 {
+    font-family: var(--font-display);
+    font-weight: 480;
+    font-size: clamp(34px, 4.4vw, 54px);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+
+  .num-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Identifiers people read character by character (IPs, ports, order numbers):
+     tabular figures so columns line up, and slightly open tracking so digits don't crowd.
+     (Google's delivery of Inter keeps `tnum` but strips the stylistic sets such as slashed zero.) */
+  .data-id {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  .hairline {
+    border-color: var(--color-line);
+  }
+
+  /* ---- Flat structure: hairline grids instead of cards -----------------
+     Wrap a grid in .ruled-wrap and give the grid .ruled. Every child gets a
+     left + top hairline; the wrapper clips the outermost ones, so dividers
+     appear only BETWEEN cells at every breakpoint and every wrap point.   */
+  .ruled-wrap {
+    overflow: hidden;
+  }
+  .ruled {
+    margin: -1px 0 0 -1px;
+  }
+  .ruled > * {
+    border-left: 1px solid var(--color-line);
+    border-top: 1px solid var(--color-line);
+  }
+
+  /* ---- "Ledger" details shared by the dashboard and the admin console ---- */
+
+  /* 8px status dot; data-pulse adds a slow outline ring (never a fill or a glow). */
+  .signal {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+  .signal[data-pulse="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid currentColor;
+    animation: signal-ring 2s ease-out infinite;
+  }
+
+  /* Table / list rows: a 2px lavender rail slides in on hover and keyboard focus. */
+  .ledger-row {
+    position: relative;
+  }
+  .ledger-row::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    background: var(--color-lav-500);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+    pointer-events: none;
+  }
+  .ledger-row:hover::before,
+  .ledger-row:focus-within::before,
+  .ledger-row[aria-selected="true"]::before,
+  .ledger-row[data-active="true"]::before {
+    opacity: 1;
+  }
+  tr.ledger-row::before {
+    display: none; /* a pseudo-element can't be absolutely positioned against a <tr>; cells draw the rail instead */
+  }
+  tr.ledger-row > :first-child {
+    position: relative;
+  }
+  tr.ledger-row > :first-child::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    background: var(--color-lav-500);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+  }
+  tr.ledger-row:hover > :first-child::before,
+  tr.ledger-row:focus-within > :first-child::before,
+  tr.ledger-row[data-active="true"] > :first-child::before {
+    opacity: 1;
+  }
+
+  /* Flat grey pulse — no shimmer gradient */
+  .skeleton {
+    background: var(--color-line);
+    border-radius: var(--radius-btn);
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes skeleton-pulse {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
+
+/* Blend illustrations (generated on pure white) into the #F1F1F1 page */
+.blend-multiply {
+  mix-blend-mode: multiply;
+}
+
+/* ------------------------------------------------------------------
+   Component animations & textures
+------------------------------------------------------------------- */
+/* The locations globe: one slow turn every 90 s, a gentle float, and country chips drifting on their own beats. */
+@keyframes globe-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes globe-float {
+  from {
+    transform: translateY(-6px);
+  }
+  to {
+    transform: translateY(8px);
+  }
+}
+@keyframes chip-float {
+  from {
+    transform: translateY(-5px);
+  }
+  to {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes signal-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(2.7);
+    opacity: 0;
+  }
+}
+/* WhatsApp launcher: a soft ring that fades outward (runs three times, then stops), and the panel rising in. */
+@keyframes wa-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+@keyframes wa-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes palette-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+@keyframes nm-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.nm-viewport[data-state="open"] {
+  animation: nm-in 0.16s ease-out;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .nm-viewport[data-state="open"] {
+    animation: none;
+  }
+}
+
+/* Reveal-on-scroll (see components/shared/reveal.tsx) */
+.reveal {
+  transition:
+    opacity 0.45s ease-out,
+    transform 0.45s ease-out;
+}
+.reveal[data-reveal="out"] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal[data-reveal="out"] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Footer call-to-action band: the track holds six identical copies and slides by half its width
+   (three copies), so the loop is seamless on any screen up to ~2,700px. It stops on hover and focus,
+   with the pause button, and for anyone who asked their system for less motion. */
+@keyframes footer-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.footer-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: footer-marquee 75s linear infinite;
+}
+.footer-marquee:hover .footer-marquee-track,
+.footer-marquee:focus-within .footer-marquee-track,
+.footer-marquee[data-paused="true"] .footer-marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-marquee-track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: none;
+  }
+  .footer-marquee-track > [aria-hidden="true"],
+  .footer-marquee-pause {
+    display: none;
+  }
+}
+
+/* Printing (invoices): white A4 paper, no app chrome. Elements opt out with Tailwind's `print:hidden`. */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  main {
+    padding: 0 !important;
+  }
+  .invoice {
+    max-width: none !important;
+    font-size: 13px;
+    break-inside: avoid-page;
+  }
+  .invoice tr,
+  .invoice section {
+    break-inside: avoid;
+  }
+}

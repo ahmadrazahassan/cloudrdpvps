@@ -1,0 +1,27 @@
+{
+  "_about": "The countries we sell Windows RDP and Windows VPS in at launch, most-asked-for first (the order the site lists them and the first one a new visitor lands on). Pakistan is deliberately not here: we don't host there. The owner changes this in Admin → Catalog → Countries; this file is only the starting set (the built-in catalog, supabase/seed.sql and `npm run launch:apply` are all generated from it).",
+  "plans": ["rdp/starter", "rdp/standard", "rdp/pro", "rdp/elite", "vps/s", "vps/m", "vps/l", "vps/xl"],
+  "tiers": {
+    "_about": "USD per 30 days for each plan above, in that order. PLACEHOLDERS: set real prices in Admin → Pricing & stock.",
+    "value": [6, 12, 22, 38, 8, 16, 30, 55],
+    "standard": [9, 16, 28, 48, 12, 22, 40, 72],
+    "premium": [10, 18, 30, 52, 13, 24, 44, 78]
+  },
+  "countries": [
+    ["US", "standard"], ["GB", "premium"], ["DE", "premium"], ["NL", "premium"], ["FR", "premium"],
+    ["CA", "standard"], ["SG", "premium"], ["JP", "premium"], ["AU", "premium"], ["IN", "value"],
+    ["AE", "standard"], ["BR", "standard"], ["IE", "premium"], ["CH", "premium"], ["SE", "premium"],
+    ["ES", "standard"], ["IT", "standard"], ["PL", "standard"], ["HK", "premium"], ["KR", "premium"],
+    ["ID", "value"], ["MY", "value"], ["TH", "value"], ["VN", "value"], ["PH", "value"],
+    ["TR", "value"], ["SA", "standard"], ["QA", "standard"], ["IL", "premium"], ["ZA", "standard"],
+    ["MX", "standard"], ["AR", "standard"], ["CL", "standard"], ["CO", "standard"], ["PE", "standard"],
+    ["NO", "premium"], ["DK", "premium"], ["FI", "premium"], ["AT", "premium"], ["BE", "premium"],
+    ["PT", "standard"], ["CZ", "standard"], ["HU", "standard"], ["RO", "value"], ["BG", "value"],
+    ["GR", "standard"], ["UA", "value"], ["RS", "value"], ["SK", "standard"], ["SI", "standard"],
+    ["HR", "standard"], ["LT", "standard"], ["LV", "standard"], ["EE", "standard"], ["LU", "premium"],
+    ["IS", "premium"], ["NZ", "premium"], ["TW", "standard"], ["KZ", "standard"], ["BD", "value"],
+    ["LK", "value"], ["NP", "value"], ["KW", "standard"], ["BH", "standard"], ["OM", "standard"],
+    ["JO", "standard"], ["EG", "value"], ["NG", "value"], ["KE", "value"], ["GH", "value"],
+    ["MA", "standard"], ["TN", "standard"], ["PA", "standard"], ["CR", "standard"], ["UY", "standard"]
+  ]
+}

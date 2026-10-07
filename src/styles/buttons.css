@@ -1,0 +1,280 @@
+/* ------------------------------------------------------------------
+   Glossy button system.
+   >>> This is the ONLY file in the project allowed to contain gradients. <<<
+   Variants: primary (lavender gloss), secondary (white gloss),
+   dark (ink gloss), ghost, ghost-inverse, danger.  Radius 10px — never a
+   capsule, never a hard square.
+------------------------------------------------------------------- */
+@layer components {
+  .btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 20px;
+    border-radius: var(--radius-btn);
+    border: 1px solid transparent;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.009em;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.2s ease,
+      filter 0.2s ease,
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.55) opacity(0.6);
+  }
+
+  .btn-sm {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+  .btn-lg {
+    height: 52px;
+    padding: 0 26px;
+    font-size: 15px;
+  }
+
+  /* ---------- Primary: lavender gloss ---------- */
+  .btn-primary {
+    color: #fff;
+    border-color: #5b30a8;
+    background: linear-gradient(
+      180deg,
+      #aa8cef 0%,
+      #8d63de 46%,
+      #7b4fd0 54%,
+      #6a3fbd 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.55),
+      inset 0 -1px 0 rgb(0 0 0 / 0.18),
+      0 1px 2px rgb(60 28 120 / 0.35),
+      0 10px 20px -8px rgb(100 57 174 / 0.55);
+    text-shadow: 0 1px 0 rgb(40 15 90 / 0.35);
+  }
+  /* gloss band across the top half */
+  .btn-primary::before {
+    content: "";
+    position: absolute;
+    inset: 1px 1px 52% 1px;
+    z-index: -1;
+    border-radius: 9px 9px 60% 60% / 9px 9px 8px 8px;
+    background: linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.4),
+      rgb(255 255 255 / 0.05)
+    );
+    pointer-events: none;
+  }
+  /* sheen sweep on hover */
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    top: -25%;
+    bottom: -25%;
+    left: -60%;
+    width: 38%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.6),
+      transparent
+    );
+    transform: skewX(-20deg);
+    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.05) saturate(1.05);
+    transform: translateY(-1px);
+  }
+  .btn-primary:hover::after {
+    transform: skewX(-20deg) translateX(430%);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+    filter: brightness(0.96);
+    box-shadow:
+      inset 0 2px 5px rgb(40 15 90 / 0.4),
+      0 1px 1px rgb(60 28 120 / 0.3);
+  }
+
+  /* ---------- Secondary: white gloss ---------- */
+  .btn-secondary {
+    color: var(--color-ink);
+    border-color: var(--color-line-2);
+    background: linear-gradient(180deg, #ffffff 0%, #f3f3f6 100%);
+    box-shadow:
+      inset 0 1px 0 #fff,
+      inset 0 -1px 0 rgb(18 18 20 / 0.05),
+      0 1px 2px rgb(18 18 20 / 0.08);
+  }
+  .btn-secondary::after {
+    content: "";
+    position: absolute;
+    top: -25%;
+    bottom: -25%;
+    left: -60%;
+    width: 36%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.9),
+      transparent
+    );
+    transform: skewX(-20deg);
+    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+  .btn-secondary:hover {
+    border-color: #b9b9c3;
+    background: linear-gradient(180deg, #ffffff 0%, #ececf0 100%);
+    transform: translateY(-1px);
+  }
+  .btn-secondary:hover::after {
+    transform: skewX(-20deg) translateX(440%);
+  }
+  .btn-secondary:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 4px rgb(18 18 20 / 0.12);
+  }
+
+  /* ---------- Dark: ink gloss ---------- */
+  .btn-dark {
+    color: #fff;
+    border-color: #000;
+    background: linear-gradient(
+      180deg,
+      #2d2d33 0%,
+      #17171a 48%,
+      #0d0d0f 52%,
+      #08080a 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      inset 0 -1px 0 rgb(0 0 0 / 0.4),
+      0 1px 2px rgb(0 0 0 / 0.35),
+      0 8px 18px -8px rgb(0 0 0 / 0.5);
+  }
+  .btn-dark::after {
+    content: "";
+    position: absolute;
+    top: -25%;
+    bottom: -25%;
+    left: -60%;
+    width: 34%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.28),
+      transparent
+    );
+    transform: skewX(-20deg);
+    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+  .btn-dark:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.12);
+  }
+  .btn-dark:hover::after {
+    transform: skewX(-20deg) translateX(460%);
+  }
+  .btn-dark:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.6);
+  }
+
+  /* ---------- Danger: red gloss ---------- */
+  .btn-danger {
+    color: #fff;
+    border-color: #8e2323;
+    background: linear-gradient(
+      180deg,
+      #e06565 0%,
+      #c93d3d 48%,
+      #b93232 52%,
+      #a52a2a 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.45),
+      inset 0 -1px 0 rgb(0 0 0 / 0.18),
+      0 1px 2px rgb(120 28 28 / 0.35);
+  }
+  .btn-danger:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+  .btn-danger:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 5px rgb(60 10 10 / 0.45);
+  }
+
+  /* ---------- Ghost (flat, no gradient) ---------- */
+  .btn-ghost {
+    color: var(--color-ink);
+    background: transparent;
+  }
+  .btn-ghost:hover {
+    background: rgb(18 18 20 / 0.05);
+  }
+  .btn-ghost:active {
+    background: rgb(18 18 20 / 0.09);
+  }
+
+  /* ---------- Ghost on lavender/dark panels (flat) ---------- */
+  .btn-ghost-inverse {
+    color: #fff;
+    background: transparent;
+    border-color: rgb(255 255 255 / 0.4);
+  }
+  .btn-ghost-inverse:hover {
+    background: rgb(255 255 255 / 0.12);
+    border-color: rgb(255 255 255 / 0.65);
+  }
+
+  /* Loading state keeps the button width stable */
+  .btn[data-loading="true"] {
+    pointer-events: none;
+  }
+  .btn-spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: btn-spin 0.7s linear infinite;
+  }
+  @keyframes btn-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn::after {
+      display: none;
+    }
+    .btn {
+      transition: none;
+    }
+  }
+}
