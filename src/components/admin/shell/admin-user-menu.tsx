@@ -14,7 +14,7 @@ export interface AdminMenuUser {
 }
 
 /** Account block at the foot of the console sidebar: who you are, your role, a way back to the customer dashboard, sign out. */
-export function AdminUserMenu({ user }: { user: AdminMenuUser }) {
+export function AdminUserMenu({ user, collapsed = false }: { user: AdminMenuUser; collapsed?: boolean }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -38,17 +38,18 @@ export function AdminUserMenu({ user }: { user: AdminMenuUser }) {
     };
   }, [open]);
 
-  const item = "flex w-full items-center gap-3 px-3 py-2.5 text-left text-[14px] font-medium text-ink hover:bg-black/[0.04]";
+  const item = "flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-[14px] font-medium text-ink hover:bg-bg";
 
   return (
     <div ref={root} className="relative">
       {open && (
-        <div id="admin-user-menu" role="menu" className="absolute bottom-full left-0 z-30 mb-2 w-full border border-line-2 bg-bg py-1">
+        <div id="admin-user-menu" role="menu" className="absolute bottom-full left-0 z-30 mb-2 w-[232px] rounded-card border border-black/[0.06] bg-surface p-1.5 shadow-2">
           <Link href="/dashboard" role="menuitem" onClick={() => setOpen(false)} className={item}>
             <LayoutDashboard size={18} strokeWidth={1.5} aria-hidden className="text-muted" />
             Customer dashboard
           </Link>
-          <button type="button" role="menuitem" onClick={() => void logout({})} className={cn(item, "border-t border-line")}>
+          <div role="separator" className="mx-1 my-1.5 h-px bg-line" />
+          <button type="button" role="menuitem" onClick={() => void logout({})} className={item}>
             <LogOut size={18} strokeWidth={1.5} aria-hidden className="text-muted" />
             Sign out
           </button>
@@ -61,16 +62,16 @@ export function AdminUserMenu({ user }: { user: AdminMenuUser }) {
         aria-controls="admin-user-menu"
         aria-haspopup="menu"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-3 rounded-btn px-2 py-2 text-left transition-colors hover:bg-black/[0.04]"
+        className={cn("flex w-full items-center gap-3 rounded-card px-2.5 py-2 text-left transition-colors hover:bg-bg", collapsed && "justify-center")}
       >
         <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-lav-100 text-[12px] font-semibold text-lav-800">
           {user.initials}
         </span>
-        <span className="min-w-0 flex-1">
+        <span className={cn("min-w-0 flex-1", collapsed && "sr-only")}>
           <span className="block truncate text-[14px] font-semibold text-ink">{user.name}</span>
           <span className="block truncate text-[12px] capitalize text-muted">{user.role}</span>
         </span>
-        <ChevronUp size={16} strokeWidth={1.5} aria-hidden className={cn("text-muted transition-transform", !open && "rotate-180")} />
+        {!collapsed && <ChevronUp size={16} strokeWidth={1.5} aria-hidden className={cn("text-muted transition-transform", !open && "rotate-180")} />}
       </button>
     </div>
   );

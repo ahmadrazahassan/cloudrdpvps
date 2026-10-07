@@ -49,7 +49,7 @@ export function PaletteButton({ placeholder = "Search or jump to…", className 
       type="button"
       onClick={openPalette}
       className={cn(
-        "flex h-10 w-full items-center gap-3 rounded-btn border border-line-2 px-3 text-left text-[14px] text-muted transition-colors hover:border-muted",
+        "flex h-10 w-full items-center gap-3 rounded-card border border-line-2 px-3 text-left text-[14px] text-muted transition-colors hover:border-muted",
         className,
       )}
     >
@@ -213,7 +213,7 @@ export function CommandPalette({
         <Dialog.Overlay className="fixed inset-0 z-[80] bg-ink/30 data-[state=open]:animate-[fade-in_0.15s_ease-out]" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed left-1/2 top-[12vh] z-[90] w-[calc(100%-24px)] max-w-[620px] -translate-x-1/2 border border-line-2 bg-bg data-[state=open]:animate-[palette-in_0.16s_ease-out]"
+          className="fixed left-1/2 top-[12vh] z-[90] w-[calc(100%-24px)] max-w-[640px] -translate-x-1/2 overflow-hidden rounded-panel border border-black/[0.06] bg-surface shadow-2 data-[state=open]:animate-[palette-in_0.16s_ease-out]"
         >
           <Dialog.Title className="sr-only">Command palette</Dialog.Title>
           <div className="flex items-center gap-3 border-b border-line px-4">
@@ -257,7 +257,7 @@ export function CommandPalette({
                       data-active={index === safeActive || undefined}
                       onMouseMove={() => index !== safeActive && setActive(index)}
                       onClick={() => jump(item.href)}
-                      className="ledger-row flex min-h-[40px] cursor-pointer items-center gap-3 px-4 text-[14px] text-ink"
+                      className="ledger-row mx-2 flex min-h-[42px] cursor-pointer items-center gap-3 rounded-card px-3 text-[14px] text-ink"
                     >
                       <span className="min-w-0 flex-1 truncate font-medium">{item.label}</span>
                       {item.hint && <span className="hidden max-w-[45%] truncate text-[13px] text-muted sm:block">{item.hint}</span>}

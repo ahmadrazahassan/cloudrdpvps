@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Card } from "@/components/portal/cards";
 import { cn } from "@/lib/utils";
 
 export interface Column<T> {
@@ -16,8 +17,8 @@ export interface Column<T> {
 const HIDE = { sm: "hidden sm:table-cell", md: "hidden md:table-cell", lg: "hidden lg:table-cell", xl: "hidden xl:table-cell" } as const;
 
 /**
- * A dense, flat table: hairline rows, a lavender rail on hover and focus, row height from the
- * console's density setting (36px compact / 48px comfortable). Real <table> markup, so headers, scope and
+ * A table in a white card: a pale header row, hairlines between rows, a soft wash on hover and focus, row height
+ * from the console's density setting (44px compact / 56px comfortable). Real <table> markup, so headers, scope and
  * keyboard reading work as expected; wide tables scroll inside a labelled, focusable region.
  * Put an `<a data-row-link>` in a row's first cell and J / K move between rows.
  */
@@ -39,25 +40,27 @@ export function DataTable<T>({
 }) {
   if (rows.length === 0) {
     return (
-      <div className="border-y border-line py-14 text-center text-[14px] text-muted" role="status">
-        {empty}
-      </div>
+      <Card>
+        <p className="px-6 py-16 text-center text-[14px] text-muted" role="status">
+          {empty}
+        </p>
+      </Card>
     );
   }
   return (
-    <div>
+    <Card className="overflow-hidden">
       {/* `relative` here (on the scrolling element itself) keeps the screen-reader-only header text inside the clipped region. */}
       <div className="relative overflow-x-auto" tabIndex={0} role="region" aria-label={label}>
-        <table className="w-full min-w-[640px] border-collapse text-left text-[13.5px]">
+        <table className="w-full min-w-[640px] border-collapse text-left text-[14px]">
           <caption className="sr-only">{label}</caption>
           <thead>
-            <tr className="border-b border-line-2">
+            <tr className="bg-surface-2">
               {columns.map((c) => (
                 <th
                   key={c.key}
                   scope="col"
                   className={cn(
-                    "label-caps h-9 whitespace-nowrap px-3 font-medium",
+                    "label-caps h-11 whitespace-nowrap px-4 font-medium first:pl-5 last:pr-5 sm:first:pl-6 sm:last:pr-6",
                     c.align === "right" && "text-right",
                     c.hide && HIDE[c.hide],
                   )}
@@ -67,11 +70,11 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-line">
             {rows.map((row) => (
-              <tr key={rowKey(row)} className="ledger-row h-[var(--row-h)] border-b border-line transition-colors hover:bg-black/[0.015]" data-active={rowActive?.(row) || undefined}>
+              <tr key={rowKey(row)} className="ledger-row h-[var(--row-h)]" data-active={rowActive?.(row) || undefined}>
                 {columns.map((c) => (
-                  <td key={c.key} className={cn("px-3 py-1.5 align-middle", c.align === "right" && "text-right", c.hide && HIDE[c.hide], c.className)}>
+                  <td key={c.key} className={cn("px-4 py-2 align-middle first:pl-5 last:pr-5 sm:first:pl-6 sm:last:pr-6", c.align === "right" && "text-right", c.hide && HIDE[c.hide], c.className)}>
                     {c.cell(row)}
                   </td>
                 ))}
@@ -80,6 +83,6 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }

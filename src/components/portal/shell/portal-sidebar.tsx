@@ -2,9 +2,9 @@
 
 import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 import { Logo, LogoMark } from "@/components/brand/logo";
 import { ButtonLink } from "@/components/ui/button";
+import { usePersistedFlag } from "@/lib/use-persisted-flag";
 import { cn } from "@/lib/utils";
 import { NavList } from "./nav-list";
 import { UserMenu, type MenuUser } from "./user-menu";
@@ -12,41 +12,11 @@ import { UserMenu, type MenuUser } from "./user-menu";
 const STORAGE_KEY = "crv.sidebar.collapsed";
 
 /**
- * The collapsed/expanded choice lives in localStorage (per browser). It is read through
- * useSyncExternalStore so the server renders "expanded" and the browser switches after hydration
- * without a mismatch; other tabs stay in sync through the `storage` event.
- */
-const listeners = new Set<() => void>();
-function subscribe(onChange: () => void) {
-  listeners.add(onChange);
-  window.addEventListener("storage", onChange);
-  return () => {
-    listeners.delete(onChange);
-    window.removeEventListener("storage", onChange);
-  };
-}
-function readCollapsed() {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === "1";
-  } catch {
-    return false; // storage can be blocked; expanded is a fine default
-  }
-}
-function writeCollapsed(value: boolean) {
-  try {
-    localStorage.setItem(STORAGE_KEY, value ? "1" : "0");
-  } catch {
-    /* ignore */
-  }
-  listeners.forEach((l) => l());
-}
-
-/**
  * Desktop sidebar: a white card floating on the page (264px, collapsible to a 72px icon rail). The outer
  * wrapper only reserves the column and its 12px gutter; the card inside is what scrolls with the viewport.
  */
 export function PortalSidebar({ user, unread }: { user: MenuUser; unread: number }) {
-  const collapsed = useSyncExternalStore(subscribe, readCollapsed, () => false);
+  const [collapsed, setCollapsed] = usePersistedFlag(STORAGE_KEY);
 
   return (
     <aside
@@ -91,7 +61,7 @@ export function PortalSidebar({ user, unread }: { user: MenuUser; unread: number
           <UserMenu user={user} collapsed={collapsed} />
           <button
             type="button"
-            onClick={() => writeCollapsed(!collapsed)}
+            onClick={() => setCollapsed(!collapsed)}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-pressed={collapsed}
             className={cn(

@@ -41,7 +41,7 @@ export default async function PlansPage() {
       ),
     },
     { key: "locations", header: "Locations", align: "right", hide: "sm", cell: (p) => <span className="num-tabular">{offered.get(p.id) ?? 0}</span> },
-    { key: "state", header: "Status", cell: (p) => <AdminBadge kind="account" status={p.is_active ? "active" : "suspended"} className={p.is_active ? "" : ""} /> },
+    { key: "state", header: "Status", cell: (p) => <AdminBadge kind="account" status={p.is_active ? "active" : "suspended"} /> },
     { key: "edit", header: "Edit", srOnlyHeader: true, align: "right", cell: (p) => <PlanEditor plan={p} /> },
   ];
 

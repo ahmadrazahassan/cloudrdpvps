@@ -31,7 +31,7 @@ function write(value: Density) {
   listeners.forEach((l) => l());
 }
 
-/** Compact (36px rows) or comfortable (48px) tables. Remembered per browser; applied as `html[data-density]`. */
+/** Compact (44px rows) or comfortable (56px) tables. Remembered per browser; applied as `html[data-density]`. */
 export function DensityToggle() {
   const density = useSyncExternalStore(subscribe, read, () => "compact" as Density);
 
@@ -49,7 +49,7 @@ export function DensityToggle() {
       aria-pressed={comfortable}
       aria-label="Comfortable row spacing"
       title={comfortable ? "Switch to compact rows" : "Switch to comfortable rows"}
-      className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-btn text-muted transition-colors hover:bg-black/[0.05] hover:text-ink sm:inline-flex"
+      className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-card text-ink-2 transition-colors hover:bg-black/[0.05] hover:text-ink sm:inline-flex"
     >
       <Icon size={18} strokeWidth={1.5} aria-hidden />
     </button>

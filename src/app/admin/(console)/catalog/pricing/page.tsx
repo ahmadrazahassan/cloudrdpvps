@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminHeader } from "@/components/admin/parts";
 import { PricingMatrix } from "@/components/admin/pricing-matrix";
+import { Card } from "@/components/portal/cards";
 import { requireAdminConsole } from "@/lib/admin/guard";
 import { getCatalogAdmin } from "@/lib/admin/queries-system";
 
@@ -17,9 +18,11 @@ export default async function PricingPage() {
     <>
       <AdminHeader title="Pricing & stock" description="Price (USD, per 30-day term), stock state and availability for every plan in every location. Edits go live on the public site when you save." />
       {plans.length === 0 || locations.length === 0 ? (
-        <p className="border-y border-line py-12 text-center text-[14px] text-muted">
-          Add at least one <Link href="/admin/catalog/plans" className="text-link">plan</Link> and one <Link href="/admin/catalog/locations" className="text-link">location</Link> first.
-        </p>
+        <Card padded>
+          <p className="py-8 text-center text-[14px] text-muted">
+            Add at least one <Link href="/admin/catalog/plans" className="text-link">plan</Link> and one <Link href="/admin/catalog/locations" className="text-link">location</Link> first.
+          </p>
+        </Card>
       ) : (
         <PricingMatrix key={version} plans={plans} locations={locations} pricing={pricing} />
       )}

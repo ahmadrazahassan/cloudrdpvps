@@ -75,15 +75,15 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
         title="Inventory"
         description="Servers you've bought from suppliers and are holding for orders. Delivering from stock is one click on the order."
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2">
             <ImportInventory />
             <AddInventory locations={catalog.locations.map((l) => ({ value: l.id, label: l.name }))} plans={catalog.plans.map((p) => ({ value: p.id, label: `${p.product.toUpperCase()} ${p.name}` }))} />
-          </>
+          </div>
         }
       />
 
       {low.length > 0 && (
-        <div role="status" className="mb-6 border-y border-line py-4">
+        <div role="status" className="rounded-panel bg-warn-bg px-6 py-4">
           <p className="flex items-center gap-2 text-[14px] font-semibold text-warn">
             <TriangleAlert size={16} strokeWidth={1.75} aria-hidden /> Running low (≤ {threshold} available)
           </p>
@@ -101,13 +101,11 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       )}
 
       <FilterLinks label="Stock status" current={view} hrefFor={(id) => withParams("/admin/inventory", { view: id === "available" ? null : id, product })} items={VIEWS.map((v) => ({ id: v.id, label: v.label }))} />
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar action="/admin/inventory" keep={{ view: view === "available" ? undefined : view }} placeholder="Filter" selects={[{ name: "product", label: "Product", all: "RDP & VPS", value: product, options: [{ value: "rdp", label: "RDP" }, { value: "vps", label: "VPS" }] }]} />
         <ResultCount total={data.total} noun="server" />
       </div>
-      <div className="mt-4">
-        <DataTable rows={data.items} columns={columns} rowKey={(i) => i.id} label="Inventory" empty="No servers in stock. Add one, or import a CSV." />
-      </div>
+      <DataTable rows={data.items} columns={columns} rowKey={(i) => i.id} label="Inventory" empty="No servers in stock. Add one, or import a CSV." />
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/inventory", { view: view === "available" ? null : view, product, page: n })} />
     </>
   );

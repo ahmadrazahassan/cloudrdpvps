@@ -96,20 +96,21 @@
     accent-color: var(--color-lav-600);
   }
 
-  /* Form-level message: a coloured left rule, no filled box */
+  /* Form-level message: a quiet tinted block, text colours chosen for AA contrast on the tint */
   .form-note {
-    border-left: 2px solid var(--color-line-2);
-    padding: 2px 0 2px 12px;
+    border-radius: var(--radius-card, 14px);
+    background: var(--color-surface-2);
+    padding: 12px 14px;
     font-size: 14px;
     line-height: 1.55;
     color: var(--color-ink-2);
   }
   .form-note[data-tone="error"] {
-    border-left-color: var(--color-bad);
-    color: var(--color-bad);
+    background: var(--color-bad-bg);
+    color: var(--color-bad-ink);
   }
   .form-note[data-tone="ok"] {
-    border-left-color: var(--color-ok);
+    background: var(--color-ok-bg);
     color: var(--color-ok);
   }
 

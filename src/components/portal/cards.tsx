@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Search, type LucideIcon } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Search, type LucideIcon } from "lucide-react";
 import type { ComponentProps, ElementType, ReactNode } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -127,27 +127,37 @@ export function StatCard({
   icon: Icon,
   href,
   tone = "default",
+  delta,
+  labelLines = 1,
   className,
 }: {
   label: string;
   value: ReactNode;
   note?: ReactNode;
-  icon: LucideIcon;
+  /** Drawn bare in the top-right corner. Optional: a tile without one is just a label and a number. */
+  icon?: LucideIcon;
   href?: string;
   tone?: StatTone;
+  /** Percentage change versus the previous period; omit when there is nothing to compare. */
+  delta?: number | null;
+  /** Reserve room for a two-line label so a row of tiles keeps its numbers on one line when a label wraps. */
+  labelLines?: 1 | 2;
   className?: string;
 }) {
   const primary = tone === "primary";
+  const hasDelta = typeof delta === "number" && Number.isFinite(delta);
   const body = (
     <>
       <div className="flex items-start justify-between gap-4">
-        <p className={cn("text-[14px] font-medium", primary ? "text-white" : "text-ink-2")}>{label}</p>
-        <Icon
-          size={22}
-          strokeWidth={1.5}
-          aria-hidden
-          className={cn("shrink-0", primary ? "text-white" : tone === "warn" ? "text-warn" : tone === "bad" ? "text-bad" : "text-lav-600")}
-        />
+        <p className={cn("text-[14px] font-medium", primary ? "text-white" : "text-ink-2", "leading-[21px]", labelLines === 2 && "min-h-[42px]")}>{label}</p>
+        {Icon && (
+          <Icon
+            size={22}
+            strokeWidth={1.5}
+            aria-hidden
+            className={cn("shrink-0", primary ? "text-white" : tone === "warn" ? "text-warn" : tone === "bad" ? "text-bad" : "text-lav-600")}
+          />
+        )}
       </div>
       <p
         className={cn(
@@ -157,7 +167,15 @@ export function StatCard({
       >
         {value}
       </p>
-      <p className={cn("mt-3 min-h-[20px] text-[13px] leading-snug", primary ? "text-white/90" : "text-muted")}>{note}</p>
+      <p className={cn("mt-3 flex min-h-[20px] flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] leading-snug", primary ? "text-white/90" : "text-muted")}>
+        {hasDelta && (
+          <span className={cn("inline-flex items-center gap-0.5 font-medium", primary ? "text-white" : delta! >= 0 ? "text-ok" : "text-bad-ink")}>
+            {delta! >= 0 ? <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden /> : <ArrowDownRight size={14} strokeWidth={1.75} aria-hidden />}
+            {Math.abs(delta!).toFixed(0)}%<span className="sr-only"> versus the previous period</span>
+          </span>
+        )}
+        {note}
+      </p>
     </>
   );
 
@@ -191,16 +209,24 @@ export function Tabs({
   hrefFor,
   label,
   className,
+  variant = "page",
 }: {
   items: { id: string; label: string; count?: number }[];
   current: string;
   hrefFor: (id: string) => string;
   label: string;
   className?: string;
+  /** "page": a white track on the grey page. "inset": a grey track, for tabs that sit inside a white card. */
+  variant?: "page" | "inset";
 }) {
   return (
     <nav aria-label={label} className={cn("max-w-full overflow-x-auto", className)}>
-      <ul className="inline-flex min-w-max gap-1 rounded-card border border-black/[0.06] bg-surface p-1 shadow-1">
+      <ul
+        className={cn(
+          "inline-flex min-w-max gap-1 rounded-card p-1",
+          variant === "page" ? "border border-black/[0.06] bg-surface shadow-1" : "bg-bg",
+        )}
+      >
         {items.map((it) => {
           const active = it.id === current;
           return (
@@ -210,7 +236,7 @@ export function Tabs({
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "inline-flex h-9 items-center gap-2 rounded-[10px] px-4 text-[14px] font-medium transition-colors",
-                  active ? "bg-lav-600 text-white" : "text-ink-2 hover:bg-bg hover:text-ink",
+                  active ? "bg-lav-600 text-white" : variant === "page" ? "text-ink-2 hover:bg-bg hover:text-ink" : "text-ink-2 hover:bg-black/[0.05] hover:text-ink",
                 )}
               >
                 {it.label}

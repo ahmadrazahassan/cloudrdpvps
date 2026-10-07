@@ -49,7 +49,7 @@ export function TicketReply({ ticketId, canned }: { ticketId: string; canned: { 
     <form key={sentKey} action={formAction} className="space-y-4" noValidate>
       <input type="hidden" name="ticketId" value={ticketId} />
       <FormError state={state} />
-      <div className={cn("border-l-2 pl-4 transition-colors", internal ? "border-warn" : "border-lav-500")}>
+      <div className={cn("rounded-card p-4 transition-colors", internal ? "bg-warn-bg/60" : "bg-surface-2/70")}>
         <label htmlFor="reply-body" className="mb-2 flex items-center justify-between gap-3 text-[14px] font-medium text-ink">
           <span>{internal ? <span className="text-warn">Internal note — the customer won&apos;t see this</span> : "Reply to the customer"}</span>
           {canned.length > 0 && (
@@ -60,7 +60,7 @@ export function TicketReply({ ticketId, canned }: { ticketId: string; canned: { 
                 const hit = canned.find((c) => c.id === e.target.value);
                 if (hit) insert(hit.body);
               }}
-              className="h-8 max-w-[220px] rounded-btn border border-line-2 bg-transparent px-2 text-[13px] font-normal text-ink-2 outline-none hover:border-muted focus:border-lav-600"
+              className="h-9 max-w-[220px] rounded-[10px] border border-black/[0.08] bg-surface px-2.5 text-[13px] font-normal text-ink-2 outline-none hover:border-line-2 focus:border-lav-600"
             >
               <option value="">Saved replies…</option>
               {canned.map((c) => (

@@ -72,7 +72,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
     <>
       <AdminHeader title="Services" description="Every server we have delivered. Open one to extend, suspend, change its login or terminate it." />
       <FilterLinks label="Service view" current={view} hrefFor={(id) => withParams("/admin/services", { view: id === "all" ? null : id, product, q })} items={SERVICE_VIEWS.map((v) => ({ id: v.id, label: v.label }))} />
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar
           action="/admin/services"
           q={q}
@@ -82,7 +82,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
         />
         <ResultCount total={data.total} noun="server" />
       </div>
-      <div className="mt-4">
+      <div>
         <DataTable rows={data.items} columns={columns} rowKey={(r) => r.service.id} label="Services" empty="No servers match." />
       </div>
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/services", { ...keep, page: n })} />

@@ -69,9 +69,12 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       <AdminSidebar user={menuUser} counts={counts} isAdmin={admin} />
       <div className="min-w-0 flex-1">
         <AdminTopbar user={menuUser} counts={counts} isAdmin={admin} />
-        <QueueRibbon queue={queue} nowMs={nowMs} isAdmin={admin} />
-        <main id="main" className="px-4 pb-24 pt-8 sm:px-8">
-          <div className="mx-auto max-w-[1360px]">{children}</div>
+        <main id="main" className="px-4 pb-20 pt-3 sm:px-6 lg:px-8">
+          {/* Every page is a stack of cards, 20px apart. */}
+          <div className="mx-auto flex max-w-[1440px] flex-col gap-5">
+            <QueueRibbon queue={queue} nowMs={nowMs} isAdmin={admin} />
+            {children}
+          </div>
         </main>
       </div>
     </div>

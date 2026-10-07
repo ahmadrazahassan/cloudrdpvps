@@ -88,7 +88,7 @@ export function AnnouncementForm({ initial }: { initial: AnnouncementValue }) {
         <Field label="Ends (optional)" type="datetime-local" value={v.ends} onChange={(e) => setV({ ...v, ends: e.target.value })} error={errors.ends_at} />
       </div>
       {v.enabled && v.text && (
-        <div className="border-y border-line py-3 text-center">
+        <div className="rounded-card bg-surface-2 px-4 py-3 text-center">
           <p className="label-caps mb-2">Preview</p>
           <p className={`text-[11px] font-medium uppercase tracking-[0.06em] ${v.tone === "warn" ? "text-warn" : "text-lav-700"}`}>{v.text}</p>
         </div>

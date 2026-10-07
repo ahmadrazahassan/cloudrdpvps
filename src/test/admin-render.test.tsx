@@ -202,8 +202,12 @@ async function render(name: string, load: () => Promise<{ default: unknown }>, o
   const el = await Page({ searchParams: Promise.resolve(opts.search ?? {}), params: Promise.resolve(opts.params ?? {}) });
   const html = renderToStaticMarkup(<NuqsTestingAdapter>{el}</NuqsTestingAdapter>);
   if (OUT) {
+    // Saved for the screenshot checks inside the real console shell (sidebar, top bar, queue strip); the assertions
+    // in the tests below still look at the page alone.
+    const Layout = (await import("@/app/admin/(console)/layout")).default;
+    const framed = renderToStaticMarkup(<NuqsTestingAdapter>{await Layout({ children: el as ReactNode })}</NuqsTestingAdapter>);
     mkdirSync(OUT, { recursive: true });
-    writeFileSync(path.join(OUT, `${name}.html`), html);
+    writeFileSync(path.join(OUT, `${name}.html`), framed);
     saved.push(name);
   }
   return html;
@@ -345,8 +349,8 @@ describe("catalog, content and system screens", () => {
   });
 });
 
-describe("flat-surface rules", () => {
-  it("no admin screen introduces a gradient, a card shadow or a monospace/serif font class", async () => {
+describe("surface rules", () => {
+  it("no admin screen introduces a gradient, a heavy shadow (cards use the two soft tokens) or a monospace/serif font class", async () => {
     const html = await render("rules", () => import("@/app/admin/(console)/page"));
     expect(html).not.toMatch(/gradient/i);
     expect(html).not.toMatch(/shadow-(sm|md|lg|xl)/);

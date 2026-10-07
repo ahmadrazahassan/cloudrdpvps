@@ -38,7 +38,7 @@ export function RevealCredentials({ serviceId }: { serviceId: string }) {
 
   return (
     <div>
-      <dl className="divide-y divide-line border-y border-line">
+      <dl className="divide-y divide-line rounded-card border border-line px-4">
         <div className="flex items-center justify-between gap-4 py-2.5">
           <dt className="text-[13px] text-muted">Username</dt>
           <dd className="flex min-w-0 items-center gap-1">

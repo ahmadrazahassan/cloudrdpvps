@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { FIELD } from "@/components/admin/field-class";
+import { Card } from "@/components/portal/cards";
 import { CountryFlag } from "@/components/shared/primitives";
 import { Button } from "@/components/ui/button";
 import { REGIONS } from "@/content/world";
@@ -21,7 +23,7 @@ export interface CountryRow {
 type Product = "rdp" | "vps";
 type Status = "all" | "on" | "off";
 
-const field = "h-9 rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] text-ink outline-none hover:border-muted focus:border-lav-600";
+const field = FIELD;
 
 /**
  * Pick where Windows RDP and Windows VPS are sold. Every country in the world list is here; tick RDP and/or VPS for a country
@@ -107,18 +109,18 @@ export function CountriesManager({
     });
 
   return (
-    <div className="pb-28">
-      <p className="num-tabular text-[14px] text-ink-2" aria-live="polite">
+    <div className="space-y-5">
+      <p className="num-tabular px-1 text-[14px] text-ink-2" aria-live="polite">
         <strong className="font-semibold text-ink">{onSale}</strong> {onSale === 1 ? "country" : "countries"} on sale · <strong className="font-semibold text-ink">{withRdp}</strong> with Windows RDP ·{" "}
         <strong className="font-semibold text-ink">{withVps}</strong> with Windows VPS · {view.length} to choose from
       </p>
       {(!ready.rdp || !ready.vps) && (
-        <p className="form-note mt-4" data-tone="error">
+        <p className="form-note" data-tone="error">
           {!ready.rdp && !ready.vps ? "There are no active plans yet." : `There are no active ${ready.rdp ? "VPS" : "RDP"} plans yet, so that product can't be switched on.`} Add plans on the Plans page and set their prices first.
         </p>
       )}
 
-      <div className="mt-6 flex flex-wrap items-end gap-3 border-y border-line py-4">
+      <Card padded className="flex flex-wrap items-end gap-3">
         <div>
           <label htmlFor="c-search" className="label-caps mb-1.5 block">
             Find a country
@@ -161,16 +163,16 @@ export function CountriesManager({
             ))}
           </select>
         </div>
-      </div>
+      </Card>
 
       {message && (
-        <p role={message.tone === "error" ? "alert" : "status"} className="form-note mt-5" data-tone={message.tone}>
+        <p role={message.tone === "error" ? "alert" : "status"} className="form-note" data-tone={message.tone}>
           {message.text}
         </p>
       )}
 
-      <div role="region" aria-label="Countries" className="mt-2">
-        <div className="label-caps grid grid-cols-[28px_minmax(0,1fr)_110px_110px] items-center gap-x-4 border-b border-line-2 py-3 md:grid-cols-[28px_minmax(0,1.4fr)_120px_120px_minmax(0,1fr)]">
+      <Card role="region" aria-label="Countries">
+        <div className="label-caps grid grid-cols-[28px_minmax(0,1fr)_110px_110px] items-center gap-x-4 border-b border-line bg-surface-2/60 px-6 py-3 md:grid-cols-[28px_minmax(0,1.4fr)_120px_120px_minmax(0,1fr)]">
           <label className="check !items-center" title="Select every country shown">
             <input type="checkbox" checked={allShownSelected} onChange={toggleAll} aria-label="Select every country shown" />
           </label>
@@ -181,12 +183,12 @@ export function CountriesManager({
         </div>
 
         {shown.length === 0 ? (
-          <p className="border-b border-line py-12 text-center text-[14px] text-muted">No country matches. Try a different search or filter.</p>
+          <p className="px-6 py-12 text-center text-[14px] text-muted">No country matches. Try a different search or filter.</p>
         ) : (
-          <ul>
+          <ul className="divide-y divide-line">
             {shown.map((r) => {
               return (
-                <li key={r.iso2} className="ledger-row grid grid-cols-[28px_minmax(0,1fr)_110px_110px] items-center gap-x-4 border-b border-line py-3 md:grid-cols-[28px_minmax(0,1.4fr)_120px_120px_minmax(0,1fr)]">
+                <li key={r.iso2} className="ledger-row grid grid-cols-[28px_minmax(0,1fr)_110px_110px] items-center gap-x-4 px-6 py-3 md:grid-cols-[28px_minmax(0,1.4fr)_120px_120px_minmax(0,1fr)]">
                   <label className="check !items-center">
                     <input
                       type="checkbox"
@@ -239,11 +241,11 @@ export function CountriesManager({
             })}
           </ul>
         )}
-      </div>
+      </Card>
 
       {selected.size > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-line-2 bg-bg px-4 py-3 sm:px-8 lg:left-[248px]" role="region" aria-label="Apply to the selected countries">
-          <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="sticky bottom-4 z-30 rounded-panel border border-black/[0.06] bg-surface px-6 py-4 shadow-2" role="region" aria-label="Apply to the selected countries">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <p className="num-tabular text-[14px] font-medium text-ink" aria-live="polite">
               {selected.size} selected
             </p>

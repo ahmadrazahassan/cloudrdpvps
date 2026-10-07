@@ -5,7 +5,9 @@ import { CustomerActions } from "@/components/admin/customer-actions";
 import { NoteForm } from "@/components/admin/note-form";
 import { Ago, AdminHeader, Mono } from "@/components/admin/parts";
 import { AdminBadge } from "@/components/admin/status";
+import { LifeBuoy, Server, ShoppingCart, Wallet } from "lucide-react";
 import { Facts, Figure, LedgerSection } from "@/components/ledger/primitives";
+import { Card, Row, RowList } from "@/components/portal/cards";
 import { RulerMeter } from "@/components/ledger/ruler-meter";
 import { requireConsole } from "@/lib/admin/guard";
 import { displayName } from "@/lib/admin/db";
@@ -45,22 +47,22 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
         }
       />
 
-      <div className="grid grid-cols-2 divide-line border-y border-line lg:grid-cols-4 lg:divide-x [&>*]:border-b [&>*]:border-line lg:[&>*]:border-b-0">
-        <Figure label="Lifetime spend" value={admin ? formatUsd(spend) : "—"} note={admin ? "approved orders" : "admins only"} className="lg:first:pl-0" />
-        <Figure label="Orders" value={orders.length} note="all time" />
-        <Figure label="Active servers" value={active.length} note={`${services.length} in total`} />
-        <Figure label="Tickets" value={tickets.length} note={`${tickets.filter((t) => t.status === "open").length} need a reply`} />
+      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+        <Figure icon={Wallet} label="Lifetime spend" value={admin ? formatUsd(spend) : "—"} note={admin ? "approved orders" : "admins only"} />
+        <Figure icon={ShoppingCart} label="Orders" value={orders.length} note="all time" />
+        <Figure icon={Server} label="Active servers" value={active.length} note={`${services.length} in total`} />
+        <Figure icon={LifeBuoy} label="Tickets" value={tickets.length} note={`${tickets.filter((t) => t.status === "open").length} need a reply`} />
       </div>
 
-      <div className="mt-2 grid gap-x-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0 pt-6">
-          <LedgerSection n={1} title="Servers">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-5">
+          <LedgerSection flush title="Servers">
             {services.length === 0 ? (
-              <p className="border-y border-line py-8 text-center text-[14px] text-muted">No servers yet.</p>
+              <p className="px-6 py-12 text-center text-[14px] text-muted">No servers yet.</p>
             ) : (
-              <ul className="border-t border-line">
+              <RowList>
                 {services.map((s) => (
-                  <li key={s.id} className="ledger-row flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line py-3 pl-3">
+                  <Row key={s.id} className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <Link href={`/admin/services/${s.id}`} data-row-link className="min-w-[160px] flex-1 font-semibold text-ink hover:text-lav-700">
                       {s.label}
                       <span className="block text-[12px] font-normal text-muted">
@@ -69,19 +71,19 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                     </Link>
                     <AdminBadge kind="service" status={s.status} />
                     <RulerMeter expiresAt={s.expires_at} daysLeft={daysUntil(s.expires_at, nowMs)} caption={false} className="w-[150px]" />
-                  </li>
+                  </Row>
                 ))}
-              </ul>
+              </RowList>
             )}
           </LedgerSection>
 
-          <LedgerSection n={2} title="Orders">
+          <LedgerSection flush title="Orders">
             {orders.length === 0 ? (
-              <p className="border-y border-line py-8 text-center text-[14px] text-muted">No orders yet.</p>
+              <p className="px-6 py-12 text-center text-[14px] text-muted">No orders yet.</p>
             ) : (
-              <ul className="border-t border-line">
+              <RowList>
                 {orders.slice(0, 25).map((o) => (
-                  <li key={o.id} className="ledger-row flex flex-wrap items-center gap-x-5 gap-y-1 border-b border-line py-3 pl-3">
+                  <Row key={o.id} className="flex flex-wrap items-center gap-x-5 gap-y-1">
                     <Link href={`/admin/orders/${o.id}`} data-row-link className="font-semibold text-ink hover:text-lav-700">
                       <Mono>{o.order_number}</Mono>
                     </Link>
@@ -89,34 +91,34 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                     <AdminBadge kind="order" status={o.status} />
                     <span className="num-tabular ml-auto text-[14px] text-ink">{formatUsd(o.total_cents)}</span>
                     <Ago value={o.created_at} nowMs={nowMs} className="text-[13px] text-muted" />
-                  </li>
+                  </Row>
                 ))}
-              </ul>
+              </RowList>
             )}
           </LedgerSection>
 
-          <LedgerSection n={3} title="Support tickets">
+          <LedgerSection flush title="Support tickets">
             {tickets.length === 0 ? (
-              <p className="border-y border-line py-8 text-center text-[14px] text-muted">No tickets.</p>
+              <p className="px-6 py-12 text-center text-[14px] text-muted">No tickets.</p>
             ) : (
-              <ul className="border-t border-line">
+              <RowList>
                 {tickets.slice(0, 25).map((t) => (
-                  <li key={t.id} className="ledger-row flex items-center gap-4 border-b border-line py-3 pl-3">
+                  <Row key={t.id} className="flex items-center gap-4">
                     <Link href={`/admin/tickets/${t.id}`} data-row-link className="min-w-0 flex-1 truncate text-[14px] font-medium text-ink hover:text-lav-700">
                       #{t.ticket_no} {t.subject}
                     </Link>
                     <AdminBadge kind="ticket" status={t.status} />
                     <Ago value={t.last_message_at} nowMs={nowMs} className="text-[13px] text-muted" />
-                  </li>
+                  </Row>
                 ))}
-              </ul>
+              </RowList>
             )}
           </LedgerSection>
 
-          <LedgerSection n={4} title="Internal notes" aside="Staff only">
+          <LedgerSection title="Internal notes" aside="Staff only">
             <NoteForm entityType="customer" entityId={profile.id} />
             {notes.length > 0 && (
-              <ul className="mt-6 divide-y divide-line border-y border-line">
+              <ul className="mt-6 divide-y divide-line rounded-card border border-line px-4">
                 {notes.map((n) => (
                   <li key={n.id} className="py-3">
                     <p className="whitespace-pre-wrap text-[14.5px] text-ink">{n.body}</p>
@@ -130,35 +132,33 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
           </LedgerSection>
         </div>
 
-        <aside className="min-w-0 pt-6 lg:border-l lg:border-line lg:pl-10" aria-label="Profile and actions">
-          <div className="space-y-8 pt-4">
-            <div>
-              <p className="label-caps mb-2">Profile</p>
-              <Facts
-                items={[
-                  { label: "Email", value: profile.email },
-                  { label: "Phone", value: profile.phone ?? <span className="font-normal text-muted">—</span> },
-                  { label: "Country", value: profile.billing_country ?? <span className="font-normal text-muted">—</span> },
-                  ...(profile.company ? [{ label: "Company", value: profile.company }] : []),
-                  ...(profile.telegram ? [{ label: "Telegram", value: profile.telegram }] : []),
-                  ...(profile.whatsapp ? [{ label: "WhatsApp", value: profile.whatsapp }] : []),
-                  { label: "Joined", value: formatDate(profile.created_at) },
-                  { label: "Last seen", value: profile.last_seen_at ? <Ago value={profile.last_seen_at} nowMs={nowMs} /> : <span className="font-normal text-muted">—</span> },
-                ]}
-              />
-              {profile.status === "suspended" && profile.suspended_reason && (
-                <p className="form-note mt-4" data-tone="error">
-                  Suspended: {profile.suspended_reason}
-                </p>
-              )}
-            </div>
-            {admin && profile.role === "customer" && (
-              <div>
-                <p className="label-caps mb-3">Actions</p>
-                <CustomerActions userId={profile.id} name={name} status={profile.status} />
-              </div>
+        <aside className="min-w-0 space-y-5" aria-label="Profile and actions">
+          <Card padded>
+            <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Profile</h2>
+            <Facts
+              items={[
+                { label: "Email", value: profile.email },
+                { label: "Phone", value: profile.phone ?? <span className="font-normal text-muted">—</span> },
+                { label: "Country", value: profile.billing_country ?? <span className="font-normal text-muted">—</span> },
+                ...(profile.company ? [{ label: "Company", value: profile.company }] : []),
+                ...(profile.telegram ? [{ label: "Telegram", value: profile.telegram }] : []),
+                ...(profile.whatsapp ? [{ label: "WhatsApp", value: profile.whatsapp }] : []),
+                { label: "Joined", value: formatDate(profile.created_at) },
+                { label: "Last seen", value: profile.last_seen_at ? <Ago value={profile.last_seen_at} nowMs={nowMs} /> : <span className="font-normal text-muted">—</span> },
+              ]}
+            />
+            {profile.status === "suspended" && profile.suspended_reason && (
+              <p className="form-note mt-4" data-tone="error">
+                Suspended: {profile.suspended_reason}
+              </p>
             )}
-          </div>
+          </Card>
+          {admin && profile.role === "customer" && (
+            <Card padded>
+              <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Actions</h2>
+              <CustomerActions userId={profile.id} name={name} status={profile.status} />
+            </Card>
+          )}
         </aside>
       </div>
     </>

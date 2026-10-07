@@ -1,18 +1,30 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { FIELD } from "@/components/admin/field-class";
+import { Button } from "@/components/ui/button";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { displayName, type ProfileLite } from "@/lib/admin/db";
 
-/** Page title block for console screens: smaller and denser than the customer dashboard's. */
+/** Page title block for console screens, the same as the customer dashboard's. The page body below it is a stack of cards. */
 export function AdminHeader({ title, description, actions, className }: { title: ReactNode; description?: ReactNode; actions?: ReactNode; className?: string }) {
   return (
-    <div className={cn("flex flex-wrap items-end justify-between gap-x-6 gap-y-4 pb-7", className)}>
+    <div className={cn("flex flex-wrap items-end justify-between gap-x-6 gap-y-4 pb-1 pt-1", className)}>
       <div className="min-w-0">
-        <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-0.024em] text-ink md:text-[30px]">{title}</h1>
-        {description && <p className="mt-1.5 max-w-[70ch] text-[14px] leading-relaxed text-muted">{description}</p>}
+        <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-0.026em] text-ink md:text-[30px]">{title}</h1>
+        {description && <div className="mt-1.5 max-w-[70ch] text-[15px] leading-relaxed text-muted">{description}</div>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
+    </div>
+  );
+}
+
+/** A heading above a group of stat tiles (the tiles are cards themselves, so the group isn't wrapped in another). */
+export function GroupHeading({ title, aside }: { title: ReactNode; aside?: ReactNode }) {
+  return (
+    <div className="mb-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+      <h2 className="font-display text-[17px] font-semibold leading-snug tracking-[-0.016em] text-ink">{title}</h2>
+      {aside && <div className="text-[13px] text-muted">{aside}</div>}
     </div>
   );
 }
@@ -59,7 +71,7 @@ export function SearchBox({ action, q, keep, placeholder = "Search", label = "Se
         defaultValue={q ?? ""}
         placeholder={placeholder}
         autoComplete="off"
-        className="h-9 w-full rounded-btn border border-line-2 bg-transparent px-3 text-[14px] text-ink outline-none transition-colors placeholder:text-muted hover:border-muted focus:border-lav-600 focus:outline-2 focus:outline-offset-1 focus:outline-lav-500"
+        className={cn(FIELD, "w-full")}
       />
     </form>
   );
@@ -89,7 +101,7 @@ export function FilterBar({ action, q, keep, selects = [], placeholder = "Search
         defaultValue={q ?? ""}
         placeholder={placeholder}
         autoComplete="off"
-        className="h-9 min-w-[200px] flex-1 rounded-btn border border-line-2 bg-transparent px-3 text-[14px] text-ink outline-none transition-colors placeholder:text-muted hover:border-muted focus:border-lav-600 focus:outline-2 focus:outline-offset-1 focus:outline-lav-500 sm:max-w-[320px]"
+        className={cn(FIELD, "min-w-[220px] flex-1 sm:max-w-[380px]")}
       />
       {selects.map((s) => (
         <span key={s.name} className="contents">
@@ -100,7 +112,7 @@ export function FilterBar({ action, q, keep, selects = [], placeholder = "Search
             id={`filter-${s.name}`}
             name={s.name}
             defaultValue={s.value ?? ""}
-            className="h-9 rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] text-ink outline-none transition-colors hover:border-muted focus:border-lav-600 focus:outline-2 focus:outline-offset-1 focus:outline-lav-500"
+            className={cn(FIELD, "px-2.5")}
           >
             <option value="">{s.all ?? s.label}</option>
             {s.options.map((o) => (
@@ -112,16 +124,20 @@ export function FilterBar({ action, q, keep, selects = [], placeholder = "Search
         </span>
       ))}
       {children}
-      <button type="submit" className="h-9 rounded-btn px-3 text-[14px] font-medium text-lav-700 transition-colors hover:bg-black/[0.04]">
+      <Button type="submit" variant="secondary" size="sm" className="!h-10">
         Apply
-      </button>
+      </Button>
     </form>
   );
 }
 
 /** A quiet empty block for lists with nothing in them. */
 export function EmptyRow({ children }: { children: ReactNode }) {
-  return <p className="border-y border-line py-12 text-center text-[14px] text-muted">{children}</p>;
+  return (
+    <p role="status" className="rounded-card bg-surface-2 px-6 py-12 text-center text-[14px] text-muted">
+      {children}
+    </p>
+  );
 }
 
 /** Key facts for a list header: "42 results". */

@@ -4,6 +4,7 @@ import { CannedEditor, DeleteCanned } from "@/components/admin/editors";
 import { AdminHeader } from "@/components/admin/parts";
 import { TestEmail } from "@/components/admin/settings-extras";
 import { LedgerSection } from "@/components/ledger/primitives";
+import { Row, RowList } from "@/components/portal/cards";
 import { requireAdminConsole } from "@/lib/admin/guard";
 import { getCannedAdmin, getSettingsMap } from "@/lib/admin/queries-system";
 import { emailConfigured } from "@/lib/email/send";
@@ -46,58 +47,60 @@ export default async function SettingsPage() {
     <>
       <AdminHeader title="Settings" description="Site contacts, ordering rules, maintenance mode, security and saved replies." />
 
-      <LedgerSection n={1} title="General">
-        <SettingsForm
-          group="general"
-          fields={GENERAL}
-          initial={{ site_name: s(settings.site_name) || "Cloud RDP VPS", support_email: s(settings.support_email), whatsapp: s(settings.whatsapp), telegram: s(settings.telegram), company_block: company }}
-        />
-      </LedgerSection>
+      <div className="grid items-start gap-5 xl:grid-cols-2">
+        <div className="min-w-0 space-y-5">
+          <LedgerSection title="General">
+            <SettingsForm
+              group="general"
+              fields={GENERAL}
+              initial={{ site_name: s(settings.site_name) || "Cloud RDP VPS", support_email: s(settings.support_email), whatsapp: s(settings.whatsapp), telegram: s(settings.telegram), company_block: company }}
+            />
+          </LedgerSection>
+          <LedgerSection title="Operations">
+            <SettingsForm group="operations" fields={OPERATIONS} initial={{ maintenance_enabled: maintenance.enabled === true, maintenance_message: s(maintenance.message), low_stock_threshold: n(settings.low_stock_threshold, 3) }} />
+          </LedgerSection>
+          <LedgerSection title="Security">
+            <SettingsForm group="security" fields={SECURITY} initial={{ require_staff_mfa: settings.require_staff_mfa !== false }} />
+          </LedgerSection>
+        </div>
+        <div className="min-w-0 space-y-5">
+          <LedgerSection title="Orders">
+            <SettingsForm
+              group="orders"
+              fields={ORDERS}
+              initial={{
+                unpaid_order_hours: n(settings.unpaid_order_hours, 48),
+                reject_extension_hours: n(settings.reject_extension_hours, 24),
+                max_open_orders: n(settings.max_open_orders, 3),
+                grace_days: n(settings.grace_days, 2),
+                reminder_days: Array.isArray(settings.reminder_days) ? (settings.reminder_days as number[]).join(", ") : "3, 1",
+                review_eta: s(settings.review_eta),
+                delivery_eta: s(settings.delivery_eta),
+              }}
+            />
+          </LedgerSection>
+          <LedgerSection title="Email">
+            <TestEmail configured={emailConfigured()} />
+          </LedgerSection>
+        </div>
+      </div>
 
-      <LedgerSection n={2} title="Orders">
-        <SettingsForm
-          group="orders"
-          fields={ORDERS}
-          initial={{
-            unpaid_order_hours: n(settings.unpaid_order_hours, 48),
-            reject_extension_hours: n(settings.reject_extension_hours, 24),
-            max_open_orders: n(settings.max_open_orders, 3),
-            grace_days: n(settings.grace_days, 2),
-            reminder_days: Array.isArray(settings.reminder_days) ? (settings.reminder_days as number[]).join(", ") : "3, 1",
-            review_eta: s(settings.review_eta),
-            delivery_eta: s(settings.delivery_eta),
-          }}
-        />
-      </LedgerSection>
-
-      <LedgerSection n={3} title="Operations">
-        <SettingsForm group="operations" fields={OPERATIONS} initial={{ maintenance_enabled: maintenance.enabled === true, maintenance_message: s(maintenance.message), low_stock_threshold: n(settings.low_stock_threshold, 3) }} />
-      </LedgerSection>
-
-      <LedgerSection n={4} title="Email">
-        <TestEmail configured={emailConfigured()} />
-      </LedgerSection>
-
-      <LedgerSection n={5} title="Security">
-        <SettingsForm group="security" fields={SECURITY} initial={{ require_staff_mfa: settings.require_staff_mfa !== false }} />
-      </LedgerSection>
-
-      <LedgerSection n={6} title="Saved replies" aside={<CannedEditor />}>
+      <LedgerSection flush title="Saved replies" aside={<CannedEditor />}>
         {canned.length === 0 ? (
-          <p className="border-y border-line py-8 text-center text-[14px] text-muted">No saved replies yet. Add the answers you give most often.</p>
+          <p className="px-6 py-12 text-center text-[14px] text-muted">No saved replies yet. Add the answers you give most often.</p>
         ) : (
-          <ul className="border-t border-line">
+          <RowList>
             {canned.map((c) => (
-              <li key={c.id} className="ledger-row flex flex-wrap items-start gap-x-5 gap-y-2 border-b border-line py-4 pl-3">
+              <Row key={c.id} className="flex flex-wrap items-start gap-x-5 gap-y-2">
                 <div className="min-w-[240px] flex-1">
                   <p className="text-[15px] font-semibold text-ink">{c.title}</p>
                   <p className="mt-1 line-clamp-2 max-w-[80ch] whitespace-pre-wrap text-[13.5px] text-muted">{c.body_md}</p>
                 </div>
                 <CannedEditor reply={{ id: c.id, title: c.title, body_md: c.body_md }} />
                 <DeleteCanned id={c.id} title={c.title} />
-              </li>
+              </Row>
             ))}
-          </ul>
+          </RowList>
         )}
       </LedgerSection>
     </>

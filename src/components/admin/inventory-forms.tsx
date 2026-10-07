@@ -130,7 +130,7 @@ export function ImportInventory() {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[60] bg-ink/30 data-[state=open]:animate-[fade-in_0.2s_ease-out]" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-[70] max-h-[92dvh] w-[calc(100%-32px)] max-w-[720px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line-2 bg-bg p-7 data-[state=open]:animate-[fade-in_0.15s_ease-out]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-[70] max-h-[92dvh] w-[calc(100%-32px)] max-w-[720px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-panel border border-black/[0.06] bg-surface p-7 shadow-2 data-[state=open]:animate-[fade-in_0.15s_ease-out]">
           <Dialog.Title className="text-[20px] font-semibold tracking-[-0.016em] text-ink">Import servers from CSV</Dialog.Title>
           <Dialog.Description className="mt-2.5 text-[14.5px] leading-relaxed text-ink-2">
             Columns: product, location (the location&apos;s slug, e.g. germany), ip, port, username, password, supplier, supplier_ref, cost_usd, supplier_expires. Only product, location, ip, username and password are required. IPs already in stock are skipped.
@@ -160,7 +160,7 @@ export function ImportInventory() {
                   {result.problems.length > 0 && <>, <span className="font-semibold text-warn">{result.problems.length}</span> line{result.problems.length === 1 ? "" : "s"} with a problem</>}.
                 </p>
                 {result.problems.length > 0 && (
-                  <ul className="max-h-[160px] divide-y divide-line overflow-y-auto border-y border-line text-[13px]">
+                  <ul className="max-h-[160px] divide-y divide-line overflow-y-auto rounded-card border border-line px-3 text-[13px]">
                     {result.problems.map((p) => (
                       <li key={`${p.line}-${p.message}`} className="py-1.5">
                         <span className="num-tabular mr-2 font-semibold text-ink">Line {p.line}</span>

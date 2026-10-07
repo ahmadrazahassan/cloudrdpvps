@@ -76,10 +76,10 @@ export function ProofViewer({ src, mime, name }: { src: string; mime: string | n
       </div>
 
       {isPdf ? (
-        <iframe src={src} title={`Payment proof: ${name}`} className="h-[560px] w-full border border-line-2" />
+        <iframe src={src} title={`Payment proof: ${name}`} className="h-[560px] w-full rounded-card border border-line-2" />
       ) : (
         <div
-          className="relative h-[480px] touch-none select-none overflow-hidden border border-line-2"
+          className="relative h-[480px] touch-none select-none overflow-hidden rounded-card border border-line-2"
           style={{ cursor: zoom > 1 ? "grab" : "default" }}
           onPointerDown={(e) => {
             if (zoom <= 1) return;

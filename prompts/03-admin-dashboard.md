@@ -7,6 +7,9 @@
 
 > **FLAT-SURFACE RULE (overrides everything below — see file 01 §1 rule 11).** No cards, panels, tiles, filled/tinted blocks, image or texture backgrounds, and no background behind a background. Wherever this file says "card", "white card", "panel", "frame" or "filled block", build an open section on `#F1F1F1` separated by 1px hairlines (`.ruled-wrap` / `.ruled`, divided columns, underline tabs). Inputs are transparent with a 1px border. Lavender is an accent only. Illustrations sit directly on the page.
 
+> **CARD-SURFACE UPDATE (supersedes the FLAT-SURFACE RULE for the admin console too).** The console now matches the customer dashboard: white cards on the `#F1F1F1` page (`rounded-panel` 20px, 6% black hairline, `shadow-1`), 20px between cards and 24px inside them. Use the same building blocks (`src/components/portal/cards.tsx`: `Card`, `StatCard`, `Tabs`, `RowList`/`Row`, `PagerBar`) through the admin wrappers in `src/components/ledger/primitives.tsx` (`LedgerSection` = a titled card, `flush` for lists and tables; `Figure` = a stat tile with an optional bare icon) and `src/components/admin/{parts,data-table,charts,status}.tsx`. Pages are a grid of cards: list pages = filter row + one table card; detail pages = a main column of cards plus a 340px aside of cards (Summary, Actions). Fields are white with a soft hairline, 40px tall, 14px radius (`FIELD`); form messages are tinted blocks, not left rules; dialogs are white rounded panels; save bars float as a sticky card instead of a full-width strip. Still binding: bare icons with **no chip, circle or tile behind them**, lavender as the only brand hue, solid fills only, Inter / Inter Tight, 10px buttons, WCAG AA text on every tint (use `text-bad-ink` on `bg-bad-bg`). Where the rest of this file says "open section", "hairline-separated" or "right rail", read "card", "card list" and "aside of cards".
+
+
 ---
 
 ## 1. What the admin does all day (design around this loop)

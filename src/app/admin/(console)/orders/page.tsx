@@ -80,7 +80,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
     <>
       <AdminHeader title="Orders" description="Every order, new and renewal. Open one to see its payments, timeline and to deliver the server." />
       <FilterLinks label="Order view" current={view} hrefFor={(id) => withParams("/admin/orders", { view: id === "all" ? null : id, type, product, q })} items={VIEWS.map((v) => ({ id: v.id, label: v.label }))} />
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar
           action="/admin/orders"
           q={q}
@@ -93,7 +93,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         />
         <ResultCount total={view === "closed" ? items.length : data.total} noun="order" />
       </div>
-      <div className="mt-4">
+      <div>
         <DataTable rows={items} columns={columns} rowKey={(r) => r.order.id} label="Orders" empty="No orders match." />
       </div>
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/orders", { ...keep, page: n })} />

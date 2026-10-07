@@ -86,12 +86,12 @@ export default async function PaymentMethodsPage() {
         actions={<MethodEditor />}
       />
       {inactiveWithoutDetails.length > 0 && (
-        <p role="alert" className="form-note mb-6" data-tone="error">
+        <p role="alert" className="form-note" data-tone="error">
           {inactiveWithoutDetails.map((r) => r.method.name).join(", ")} {inactiveWithoutDetails.length === 1 ? "is" : "are"} switched on but {inactiveWithoutDetails.length === 1 ? "has" : "have"} no account details, so customers can&apos;t pay with {inactiveWithoutDetails.length === 1 ? "it" : "them"}.
         </p>
       )}
       <DataTable rows={rows} columns={columns} rowKey={(r) => r.method.id} label="Payment methods" empty="No payment methods." />
-      <p className="mt-6 max-w-[70ch] text-[13px] text-muted">
+      <p className="max-w-[70ch] px-1 text-[13px] text-muted">
         Customers pay in the currency shown, calculated from the rate above and locked when they place the order. Update a rate with Edit — the “updated” time moves only when the rate itself changes.
       </p>
     </>

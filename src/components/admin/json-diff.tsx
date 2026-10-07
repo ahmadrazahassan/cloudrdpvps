@@ -16,7 +16,7 @@ export function JsonDiff({ before, after }: { before: Json | null; after: Json |
     <div className="overflow-x-auto">
       <table className="w-full min-w-[480px] border-collapse text-left text-[13px]">
         <thead>
-          <tr className="border-b border-line-2">
+          <tr className="border-b border-line">
             <th scope="col" className="label-caps h-8 pr-4 font-medium">Field</th>
             <th scope="col" className="label-caps h-8 pr-4 font-medium">Before</th>
             <th scope="col" className="label-caps h-8 font-medium">After</th>
@@ -26,7 +26,7 @@ export function JsonDiff({ before, after }: { before: Json | null; after: Json |
           {rows.map((k) => (
             <tr key={k} className="border-b border-line align-top">
               <th scope="row" className="py-1.5 pr-4 text-left font-medium text-ink">{k}</th>
-              <td className="max-w-[260px] break-words py-1.5 pr-4 text-bad">{show(a[k])}</td>
+              <td className="max-w-[260px] break-words py-1.5 pr-4 text-bad-ink">{show(a[k])}</td>
               <td className="max-w-[260px] break-words py-1.5 text-ok">{show(b[k])}</td>
             </tr>
           ))}

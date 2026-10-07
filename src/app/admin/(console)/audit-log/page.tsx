@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Ago, AdminHeader, FilterBar, ResultCount } from "@/components/admin/parts";
+import { FIELD } from "@/components/admin/field-class";
+import { LedgerSection } from "@/components/ledger/primitives";
 import { JsonDiff } from "@/components/admin/json-diff";
 import { Pagination, pageParam, param, withParams } from "@/components/portal/list-controls";
 import { requireAdminConsole } from "@/lib/admin/guard";
@@ -60,53 +62,55 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
         ]}
       >
         <label className="sr-only" htmlFor="audit-from">From date</label>
-        <input id="audit-from" type="date" name="from" defaultValue={from ?? ""} className="h-9 rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] outline-none focus:border-lav-600" />
+        <input id="audit-from" type="date" name="from" defaultValue={from ?? ""} className={FIELD} />
         <label className="sr-only" htmlFor="audit-to">To date</label>
-        <input id="audit-to" type="date" name="to" defaultValue={to ?? ""} className="h-9 rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] outline-none focus:border-lav-600" />
+        <input id="audit-to" type="date" name="to" defaultValue={to ?? ""} className={FIELD} />
       </FilterBar>
 
-      <div className="mt-4 flex justify-end">
+      <div className="flex justify-end">
         <ResultCount total={data.total} noun="event" />
       </div>
 
-      {data.items.length === 0 ? (
-        <p className="mt-2 border-y border-line py-14 text-center text-[14px] text-muted">No events match.</p>
-      ) : (
-        <ul className="mt-2 border-t border-line">
-          {data.items.map(({ event: e, actor: who }) => {
-            const link = e.entity_type && e.entity_id && ENTITY_LINK[e.entity_type] ? (e.entity_type === "invoice" ? ENTITY_LINK.invoice : `${ENTITY_LINK[e.entity_type]}${e.entity_id}`) : null;
-            return (
-              <li key={e.id} className="border-b border-line">
-                <details className="group">
-                  <summary className="ledger-row flex cursor-pointer list-none flex-wrap items-baseline gap-x-4 gap-y-1 py-3 pl-3 text-[13.5px] [&::-webkit-details-marker]:hidden">
-                    <span className="data-id min-w-[190px] font-semibold text-ink">{e.action}</span>
-                    <span className="min-w-[140px] text-ink-2">{who ? displayName(who) : e.actor_id ? "Unknown" : "System"}</span>
-                    <span className="min-w-0 flex-1 truncate text-muted">
-                      {e.entity_type}
-                      {e.reason ? ` — ${e.reason}` : ""}
-                    </span>
-                    <time dateTime={e.created_at} title={`${formatDateTime(e.created_at)} UTC`} className="text-[12.5px] text-muted">
-                      <Ago value={e.created_at} nowMs={nowMs} />
-                    </time>
-                  </summary>
-                  <div className="space-y-4 pb-5 pl-3 pr-2">
-                    <dl className="grid gap-x-8 gap-y-1 text-[13px] sm:grid-cols-2">
-                      <div className="flex gap-3"><dt className="text-muted">When</dt><dd className="text-ink">{formatDateTime(e.created_at)} UTC</dd></div>
-                      <div className="flex gap-3"><dt className="text-muted">Role</dt><dd className="text-ink capitalize">{e.actor_role ?? "—"}</dd></div>
-                      <div className="flex gap-3"><dt className="text-muted">IP</dt><dd className="data-id text-ink">{e.ip ? String(e.ip).split("/")[0] : "—"}</dd></div>
-                      <div className="flex min-w-0 gap-3"><dt className="shrink-0 text-muted">Browser</dt><dd className="truncate text-ink">{e.user_agent ?? "—"}</dd></div>
-                      {e.entity_id && (
-                        <div className="flex gap-3"><dt className="text-muted">Record</dt><dd className="data-id break-all text-ink">{link ? <Link href={link} className="text-link">{e.entity_id}</Link> : e.entity_id}</dd></div>
-                      )}
-                    </dl>
-                    <JsonDiff before={e.before} after={e.after} />
-                  </div>
-                </details>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <LedgerSection flush title="Events">
+        {data.items.length === 0 ? (
+          <p className="px-6 py-12 text-center text-[14px] text-muted">No events match.</p>
+        ) : (
+          <ul className="divide-y divide-line">
+            {data.items.map(({ event: e, actor: who }) => {
+              const link = e.entity_type && e.entity_id && ENTITY_LINK[e.entity_type] ? (e.entity_type === "invoice" ? ENTITY_LINK.invoice : `${ENTITY_LINK[e.entity_type]}${e.entity_id}`) : null;
+              return (
+                <li key={e.id}>
+                  <details className="group">
+                    <summary className="ledger-row flex cursor-pointer list-none flex-wrap items-baseline gap-x-4 gap-y-1 px-6 py-3.5 text-[13.5px] [&::-webkit-details-marker]:hidden">
+                      <span className="data-id min-w-[190px] font-semibold text-ink">{e.action}</span>
+                      <span className="min-w-[140px] text-ink-2">{who ? displayName(who) : e.actor_id ? "Unknown" : "System"}</span>
+                      <span className="min-w-0 flex-1 truncate text-muted">
+                        {e.entity_type}
+                        {e.reason ? ` — ${e.reason}` : ""}
+                      </span>
+                      <time dateTime={e.created_at} title={`${formatDateTime(e.created_at)} UTC`} className="text-[12.5px] text-muted">
+                        <Ago value={e.created_at} nowMs={nowMs} />
+                      </time>
+                    </summary>
+                    <div className="space-y-4 px-6 pb-5">
+                      <dl className="grid gap-x-8 gap-y-1 text-[13px] sm:grid-cols-2">
+                        <div className="flex gap-3"><dt className="text-muted">When</dt><dd className="text-ink">{formatDateTime(e.created_at)} UTC</dd></div>
+                        <div className="flex gap-3"><dt className="text-muted">Role</dt><dd className="text-ink capitalize">{e.actor_role ?? "—"}</dd></div>
+                        <div className="flex gap-3"><dt className="text-muted">IP</dt><dd className="data-id text-ink">{e.ip ? String(e.ip).split("/")[0] : "—"}</dd></div>
+                        <div className="flex min-w-0 gap-3"><dt className="shrink-0 text-muted">Browser</dt><dd className="truncate text-ink">{e.user_agent ?? "—"}</dd></div>
+                        {e.entity_id && (
+                          <div className="flex gap-3"><dt className="text-muted">Record</dt><dd className="data-id break-all text-ink">{link ? <Link href={link} className="text-link">{e.entity_id}</Link> : e.entity_id}</dd></div>
+                        )}
+                      </dl>
+                      <JsonDiff before={e.before} after={e.after} />
+                    </div>
+                  </details>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </LedgerSection>
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/audit-log", { ...keep, page: n })} />
     </>
   );

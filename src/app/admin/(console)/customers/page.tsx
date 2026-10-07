@@ -51,11 +51,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
     <>
       <AdminHeader title="Customers" description="Everyone with an account. Open one for their orders, servers, tickets and notes." />
       <FilterLinks label="Account status" current={view} hrefFor={(id) => withParams("/admin/customers", { view: id === "all" ? null : id, q })} items={VIEWS.map((v) => ({ id: v.id, label: v.label }))} />
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar action="/admin/customers" q={q} keep={{ view: view === "all" ? undefined : view }} placeholder="Name, email or phone" />
         <ResultCount total={data.total} noun="customer" />
       </div>
-      <div className="mt-4">
+      <div>
         <DataTable rows={data.items} columns={columns} rowKey={(r) => r.profile.id} label="Customers" empty="No customers match." />
       </div>
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/customers", { view: view === "all" ? null : view, q, page: n })} />

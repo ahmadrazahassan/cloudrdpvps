@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { CalendarClock, CreditCard, LifeBuoy, Mail, PackageCheck, RefreshCw, Server, ShoppingCart, UserPlus, Wallet } from "lucide-react";
 import { BarList, DayBars, SplitBar } from "@/components/admin/charts";
-import { Ago, AdminHeader, Mono } from "@/components/admin/parts";
+import { Ago, AdminHeader, GroupHeading, Mono } from "@/components/admin/parts";
 import { Figure, LedgerSection } from "@/components/ledger/primitives";
+import { CardLink, Row, RowList } from "@/components/portal/cards";
 import { ButtonLink } from "@/components/ui/button";
 import { FilterLinks, param, withParams } from "@/components/portal/list-controls";
 import { requireConsole } from "@/lib/admin/guard";
@@ -11,7 +12,7 @@ import { percentChange } from "@/lib/admin/money";
 import { isAdmin } from "@/lib/auth/session";
 import { now } from "@/lib/clock";
 import { countdown, daysUntil, plural } from "@/lib/format";
-import { formatUsd } from "@/lib/utils";
+import { cn, formatUsd } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -52,20 +53,19 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
   const queueFigures = [
     ...(admin
       ? [
-          { label: "Payments to review", value: queue.paymentsToReview, href: "/admin/payments", note: oldest > 0 ? `oldest ${countdown(nowMs + oldest, nowMs)}` : "none waiting", tone: oldest > 4 * 3_600_000 ? ("bad" as const) : oldest > 3_600_000 ? ("warn" as const) : ("default" as const) },
-          { label: "Orders to allocate", value: queue.ordersToAllocate, href: "/admin/orders?view=allocate", note: "paid, awaiting a server", tone: "default" as const },
+          { icon: CreditCard, label: "Payments to review", value: queue.paymentsToReview, href: "/admin/payments", note: oldest > 0 ? `oldest ${countdown(nowMs + oldest, nowMs)}` : "none waiting", tone: oldest > 4 * 3_600_000 ? ("bad" as const) : oldest > 3_600_000 ? ("warn" as const) : ("default" as const) },
+          { icon: PackageCheck, label: "Orders to allocate", value: queue.ordersToAllocate, href: "/admin/orders?view=allocate", note: "paid, awaiting a server", tone: "default" as const },
         ]
       : []),
-    { label: "Expiring ≤ 3 days", value: queue.expiring3d, href: "/admin/services?view=expiring", note: "active servers", tone: "default" as const },
-    { label: "Tickets need a reply", value: queue.ticketsAwaitingStaff, href: "/admin/tickets", note: "open and unanswered", tone: "default" as const },
-    { label: "Unread messages", value: queue.unreadInbox, href: "/admin/inbox", note: "contact form", tone: "default" as const },
+    { icon: CalendarClock, label: "Expiring ≤ 3 days", value: queue.expiring3d, href: "/admin/services?view=expiring", note: "active servers", tone: "default" as const },
+    { icon: LifeBuoy, label: "Tickets need a reply", value: queue.ticketsAwaitingStaff, href: "/admin/tickets", note: "open and unanswered", tone: "default" as const },
+    { icon: Mail, label: "Unread messages", value: queue.unreadInbox, href: "/admin/inbox", note: "contact form", tone: "default" as const },
   ];
 
   const k = money?.kpis;
   const p = money?.previous;
   const renewalRate = k && k.renewals + k.newOrdersCompleted > 0 ? Math.round((k.renewals / (k.renewals + k.newOrdersCompleted)) * 100) : null;
   const prevRenewalRate = p && p.renewals + p.newOrdersCompleted > 0 ? Math.round((p.renewals / (p.renewals + p.newOrdersCompleted)) * 100) : null;
-  let section = 0;
 
   return (
     <>
@@ -75,63 +75,64 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         actions={admin ? <ButtonLink href="/admin/reports" variant="secondary" size="sm">Reports & export</ButtonLink> : undefined}
       />
 
-      <LedgerSection n={++section} title="Action queue" aside="Live — updates as things arrive">
-        <div className={`grid grid-cols-2 divide-line border-y border-line ${admin ? "lg:grid-cols-5" : "lg:grid-cols-3"} lg:divide-x [&>*]:border-b [&>*]:border-line lg:[&>*]:border-b-0`}>
+      <section aria-labelledby="queue-heading">
+        <GroupHeading title={<span id="queue-heading">Action queue</span>} aside="Live — updates as things arrive" />
+        <div className={cn("grid gap-4 sm:grid-cols-2 sm:gap-5", admin ? "xl:grid-cols-5" : "xl:grid-cols-3")}>
           {queueFigures.map((f) => (
-            <Figure key={f.label} label={f.label} value={f.value} note={f.note} href={f.href} tone={f.value > 0 ? f.tone : "default"} className="lg:first:pl-0" />
+            <Figure key={f.label} icon={f.icon} label={f.label} value={f.value} note={f.note} href={f.href} tone={f.value > 0 ? f.tone : "default"} labelLines={2} />
           ))}
         </div>
-      </LedgerSection>
+      </section>
 
       {money && k && p && (
         <>
-          <LedgerSection
-            n={++section}
-            title="Performance"
-            aside={
-              <FilterLinks
-                label="Date range"
-                current={money.range.days === 1 ? "today" : money.range.days === 7 ? "7d" : money.range.days === 30 ? "30d" : "90d"}
-                hrefFor={(id) => withParams("/admin", { range: id === "30d" ? null : id })}
-                items={RANGES}
-              />
-            }
-          >
-            <div className="grid grid-cols-2 divide-line border-y border-line lg:grid-cols-5 lg:divide-x [&>*]:border-b [&>*]:border-line lg:[&>*]:border-b-0">
-              <Figure label="Net revenue" value={formatUsd(k.revenueCents)} delta={percentChange(k.revenueCents, p.revenueCents)} note="vs previous period" className="lg:first:pl-0" />
-              <Figure label="Orders" value={k.orders} delta={percentChange(k.orders, p.orders)} note="placed" />
-              <Figure label="New customers" value={k.newCustomers} delta={percentChange(k.newCustomers, p.newCustomers)} note="signed up" />
-              <Figure label="Active services" value={k.activeServices} note="running now" />
-              <Figure label="Renewal share" value={renewalRate === null ? "—" : `${renewalRate}%`} delta={renewalRate !== null && prevRenewalRate !== null ? percentChange(renewalRate, prevRenewalRate) : null} note="of completed orders" />
+          <section aria-labelledby="performance-heading">
+            <GroupHeading
+              title={<span id="performance-heading">Performance</span>}
+              aside={
+                <FilterLinks
+                  label="Date range"
+                  current={money.range.days === 1 ? "today" : money.range.days === 7 ? "7d" : money.range.days === 30 ? "30d" : "90d"}
+                  hrefFor={(id) => withParams("/admin", { range: id === "30d" ? null : id })}
+                  items={RANGES}
+                />
+              }
+            />
+            <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-5">
+              <Figure icon={Wallet} label="Net revenue" value={formatUsd(k.revenueCents)} delta={percentChange(k.revenueCents, p.revenueCents)} note="vs prior period" />
+              <Figure icon={ShoppingCart} label="Orders" value={k.orders} delta={percentChange(k.orders, p.orders)} note="placed" />
+              <Figure icon={UserPlus} label="New customers" value={k.newCustomers} delta={percentChange(k.newCustomers, p.newCustomers)} note="signed up" />
+              <Figure icon={Server} label="Active services" value={k.activeServices} note="running now" />
+              <Figure icon={RefreshCw} label="Renewal share" value={renewalRate === null ? "—" : `${renewalRate}%`} delta={renewalRate !== null && prevRenewalRate !== null ? percentChange(renewalRate, prevRenewalRate) : null} note="of orders" />
             </div>
-          </LedgerSection>
+          </section>
 
-          <LedgerSection n={++section} title="Revenue by day" aside={`${money.range.days === 1 ? "Today" : `Last ${money.range.days} days`}`}>
+          <LedgerSection title="Revenue by day" aside={`${money.range.days === 1 ? "Today" : `Last ${money.range.days} days`}`}>
             <DayBars points={money.points} label="Paid invoices per day" />
           </LedgerSection>
 
-          <div className="grid gap-x-12 lg:grid-cols-3">
-            <LedgerSection n={++section} title="Orders by country">
+          <div className="grid gap-5 lg:grid-cols-3">
+            <LedgerSection title="Orders by country">
               <BarList items={money.byCountry} />
             </LedgerSection>
-            <LedgerSection n={++section} title="Product mix">
+            <LedgerSection title="Product mix">
               <SplitBar items={money.byProduct} />
             </LedgerSection>
-            <LedgerSection n={++section} title="Payment methods used">
+            <LedgerSection title="Payment methods used">
               <BarList items={money.byMethod} empty="No approved payments in this range." />
             </LedgerSection>
           </div>
         </>
       )}
 
-      <div className="grid gap-x-12 lg:grid-cols-2">
-        <LedgerSection n={++section} title="Oldest unreviewed payments" aside={<Link href="/admin/payments" className="text-link">Open queue</Link>}>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <LedgerSection flush title="Oldest unreviewed payments" aside={<CardLink href="/admin/payments">Open queue</CardLink>}>
           {work.payments.length === 0 ? (
-            <p className="border-y border-line py-8 text-center text-[14px] text-muted">Nothing waiting for review.</p>
+            <p className="px-6 py-12 text-center text-[14px] text-muted">Nothing waiting for review.</p>
           ) : (
-            <ul className="border-t border-line">
+            <RowList>
               {work.payments.map(({ payment, order, customer }) => (
-                <li key={payment.id} className="ledger-row flex items-center gap-4 border-b border-line py-3 pl-3">
+                <Row key={payment.id} className="flex items-center gap-4">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-medium text-ink">
                       <Mono>{order?.order_number ?? "—"}</Mono> <span className="text-muted">· {customer?.full_name.trim() || customer?.email || "Customer"}</span>
@@ -146,19 +147,19 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
                       Review
                     </ButtonLink>
                   )}
-                </li>
+                </Row>
               ))}
-            </ul>
+            </RowList>
           )}
         </LedgerSection>
 
-        <LedgerSection n={++section} title="Expiring in 3 days" aside={<Link href="/admin/services?view=expiring" className="text-link">All expiring</Link>}>
+        <LedgerSection flush title="Expiring in 3 days" aside={<CardLink href="/admin/services?view=expiring">All expiring</CardLink>}>
           {work.expiring.length === 0 ? (
-            <p className="border-y border-line py-8 text-center text-[14px] text-muted">No servers expire in the next 3 days.</p>
+            <p className="px-6 py-12 text-center text-[14px] text-muted">No servers expire in the next 3 days.</p>
           ) : (
-            <ul className="border-t border-line">
+            <RowList>
               {work.expiring.map(({ service, customer }) => (
-                <li key={service.id} className="ledger-row flex items-center gap-4 border-b border-line py-3 pl-3">
+                <Row key={service.id} className="flex items-center gap-4">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-medium text-ink">
                       {service.label} <span className="text-muted">· {customer?.full_name.trim() || customer?.email || "Customer"}</span>
@@ -170,29 +171,29 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
                   <ButtonLink href={`/admin/services/${service.id}`} size="sm" variant="secondary" data-row-link>
                     Open
                   </ButtonLink>
-                </li>
+                </Row>
               ))}
-            </ul>
+            </RowList>
           )}
         </LedgerSection>
       </div>
 
       {admin && (
-        <LedgerSection n={++section} title="Recent activity" aside={<Link href="/admin/audit-log" className="text-link">Full audit log</Link>}>
+        <LedgerSection flush title="Recent activity" aside={<CardLink href="/admin/audit-log">Full audit log</CardLink>}>
           {activity.length === 0 ? (
-            <p className="border-y border-line py-8 text-center text-[14px] text-muted">No activity recorded yet.</p>
+            <p className="px-6 py-12 text-center text-[14px] text-muted">No activity recorded yet.</p>
           ) : (
-            <ul className="border-t border-line">
+            <RowList>
               {activity.map(({ event, actor }) => (
-                <li key={event.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-line py-2.5 text-[13.5px]">
+                <Row key={event.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-3 text-[14px]">
                   <span className="min-w-0 flex-1 text-ink">
                     <span className="font-medium">{actor ? actor.full_name.trim() || actor.email : "System"}</span> <span className="text-ink-2">{describe(event.action)}</span>
                     {event.reason && <span className="text-muted"> — {event.reason}</span>}
                   </span>
                   <Ago value={event.created_at} nowMs={nowMs} className="text-[12.5px] text-muted" />
-                </li>
+                </Row>
               ))}
-            </ul>
+            </RowList>
           )}
         </LedgerSection>
       )}

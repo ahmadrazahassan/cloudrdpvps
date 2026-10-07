@@ -12,7 +12,8 @@ import { displayName } from "@/lib/admin/db";
 import { getTicketDetail } from "@/lib/admin/queries";
 import { now } from "@/lib/clock";
 import { daysUntil, formatDateTime } from "@/lib/format";
-import { formatUsd } from "@/lib/utils";
+import { cn, formatUsd } from "@/lib/utils";
+import { Card, Row, RowList } from "@/components/portal/cards";
 
 export const metadata: Metadata = { title: "Ticket" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -46,10 +47,10 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
         }
       />
 
-      <div className="grid gap-x-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
-          <LedgerSection n={1} title="Conversation">
-            <ol className="space-y-0 border-t border-line">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-5">
+          <LedgerSection flush title="Conversation" aside={`${messages.length} ${messages.length === 1 ? "message" : "messages"}`}>
+            <ol className="divide-y divide-line">
               {messages.map((m) => {
                 const staffAuthor = m.author_role !== "customer";
                 const who = m.author_id ? displayName(people.get(m.author_id)) : "System";
@@ -57,7 +58,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
                 return (
                   <li
                     key={m.id}
-                    className={`border-b border-line py-5 pl-4 ${m.is_internal ? "border-l-2 border-l-warn" : staffAuthor ? "border-l-2 border-l-lav-500" : "border-l-2 border-l-transparent"}`}
+                    className={cn("px-6 py-5", m.is_internal ? "bg-warn-bg/60" : staffAuthor && "bg-lav-50/70")}
                   >
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                       <span className="text-[14.5px] font-semibold text-ink">{who}</span>
@@ -86,7 +87,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
             </ol>
           </LedgerSection>
 
-          <LedgerSection n={2} title={closed ? "Closed" : "Reply"}>
+          <LedgerSection title={closed ? "Closed" : "Reply"}>
             {closed ? (
               <p className="text-[14px] text-muted">This ticket is closed. Change its status to reply again.</p>
             ) : (
@@ -95,57 +96,56 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
           </LedgerSection>
         </div>
 
-        <aside className="min-w-0 lg:border-l lg:border-line lg:pl-10" aria-label="Ticket details">
-          <div className="space-y-8 pt-4">
+        <aside className="min-w-0 space-y-5" aria-label="Ticket details">
+          <Card padded>
+            <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Manage</h2>
             <TicketControls ticketId={ticket.id} status={ticket.status} priority={ticket.priority} assignedTo={ticket.assigned_to} staff={staffOptions} me={user.id} />
+          </Card>
 
-            <div>
-              <p className="label-caps mb-2">Customer</p>
-              <Facts
-                items={[
-                  { label: "Name", value: customer ? <Link href={`/admin/customers/${customer.id}`} className="hover:text-lav-700">{displayName(customer)}</Link> : "Unknown" },
-                  { label: "Email", value: customer ? <a href={`mailto:${customer.email}`} className="break-all hover:text-lav-700">{customer.email}</a> : "—" },
-                  { label: "Account", value: customer ? <AdminBadge kind="account" status={customer.status} /> : "—" },
-                ]}
-              />
-            </div>
+          <Card padded>
+            <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Customer</h2>
+            <Facts
+              items={[
+                { label: "Name", value: customer ? <Link href={`/admin/customers/${customer.id}`} className="hover:text-lav-700">{displayName(customer)}</Link> : "Unknown" },
+                { label: "Email", value: customer ? <a href={`mailto:${customer.email}`} className="break-all hover:text-lav-700">{customer.email}</a> : "—" },
+                { label: "Account", value: customer ? <AdminBadge kind="account" status={customer.status} /> : "—" },
+              ]}
+            />
+          </Card>
 
-            {services.length > 0 && (
-              <div>
-                <p className="label-caps mb-2">Their servers</p>
-                <ul className="divide-y divide-line border-y border-line">
-                  {services.map((s) => (
-                    <li key={s.id} className="py-2.5">
-                      <Link href={`/admin/services/${s.id}`} className="block text-[14px] font-medium text-ink hover:text-lav-700">
-                        {s.label}
-                        {ticket.service_id === s.id && <span className="ml-2 text-[11px] font-medium uppercase tracking-[0.06em] text-lav-700">This ticket</span>}
-                      </Link>
-                      <span className="block text-[12.5px] text-muted">
-                        <Mono>{String(s.ip).split("/")[0]}</Mono> · {Math.max(0, daysUntil(s.expires_at, nowMs))} days left
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {services.length > 0 && (
+            <LedgerSection flush title="Their servers">
+              <RowList>
+                {services.map((s) => (
+                  <Row key={s.id} className="block py-3">
+                    <Link href={`/admin/services/${s.id}`} className="block text-[14px] font-medium text-ink hover:text-lav-700">
+                      {s.label}
+                      {ticket.service_id === s.id && <span className="ml-2 text-[11px] font-medium uppercase tracking-[0.06em] text-lav-700">This ticket</span>}
+                    </Link>
+                    <span className="block text-[12.5px] text-muted">
+                      <Mono>{String(s.ip).split("/")[0]}</Mono> · {Math.max(0, daysUntil(s.expires_at, nowMs))} days left
+                    </span>
+                  </Row>
+                ))}
+              </RowList>
+            </LedgerSection>
+          )}
 
-            {orders.length > 0 && (
-              <div>
-                <p className="label-caps mb-2">Recent orders</p>
-                <ul className="divide-y divide-line border-y border-line">
-                  {orders.map((o) => (
-                    <li key={o.id} className="flex items-center justify-between gap-3 py-2.5 text-[13.5px]">
-                      <Link href={`/admin/orders/${o.id}`} className="font-medium text-ink hover:text-lav-700">
-                        <Mono>{o.order_number}</Mono>
-                      </Link>
-                      <span className="num-tabular text-muted">{formatUsd(o.total_cents)}</span>
-                      <AdminBadge kind="order" status={o.status} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+          {orders.length > 0 && (
+            <LedgerSection flush title="Recent orders">
+              <RowList>
+                {orders.map((o) => (
+                  <Row key={o.id} className="flex items-center justify-between gap-3 py-3 text-[13.5px]">
+                    <Link href={`/admin/orders/${o.id}`} className="font-medium text-ink hover:text-lav-700">
+                      <Mono>{o.order_number}</Mono>
+                    </Link>
+                    <span className="num-tabular text-muted">{formatUsd(o.total_cents)}</span>
+                    <AdminBadge kind="order" status={o.status} />
+                  </Row>
+                ))}
+              </RowList>
+            </LedgerSection>
+          )}
         </aside>
       </div>
     </>

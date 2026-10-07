@@ -74,7 +74,7 @@ export default async function TicketsPage({ searchParams }: { searchParams: Prom
     <>
       <AdminHeader title="Tickets" description="Customer support requests, longest-waiting and most urgent first." />
       <FilterLinks label="Ticket view" current={view} hrefFor={(id) => withParams("/admin/tickets", { view: id === "awaiting" ? null : id, priority: prio, q })} items={TICKET_VIEWS.map((v) => ({ id: v.id, label: v.label }))} />
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar
           action="/admin/tickets"
           q={q}
@@ -84,7 +84,7 @@ export default async function TicketsPage({ searchParams }: { searchParams: Prom
         />
         <ResultCount total={data.total} noun="ticket" />
       </div>
-      <div className="mt-4">
+      <div>
         <DataTable rows={data.items} columns={columns} rowKey={(r) => r.ticket.id} label="Tickets" empty="No tickets match." />
       </div>
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/tickets", { ...keep, page: n })} />

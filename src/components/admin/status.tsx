@@ -65,24 +65,24 @@ const KINDS = {
 export type AdminStatusKind = keyof typeof KINDS;
 
 const TONES: Record<Tone, string> = {
-  neutral: "text-ink-2 border-line-2",
-  lavender: "text-lav-700 border-lav-300",
-  warn: "text-warn border-warn/40",
-  bad: "text-bad border-bad/40",
-  ok: "text-ok border-ok/40",
+  neutral: "bg-bg text-ink-2",
+  lavender: "bg-lav-100 text-lav-800",
+  warn: "bg-warn-bg text-warn",
+  bad: "bg-bad-bg text-bad-ink",
+  ok: "bg-ok-bg text-ok",
 };
 
 export function adminStatusLabel(kind: AdminStatusKind, status: string): string {
   return (KINDS[kind] as Record<string, readonly [string, Tone]>)[status]?.[0] ?? status.replace(/_/g, " ");
 }
 
-/** A 6px-radius outline with a dot. Flat, never filled. */
+/** A soft-tinted 6px-radius badge with a small round dot (the same as the customer dashboard's). */
 export function AdminBadge({ kind, status, className }: { kind: AdminStatusKind; status: string; className?: string }) {
   const entry = (KINDS[kind] as Record<string, readonly [string, Tone]>)[status];
   const label = entry?.[0] ?? status.replace(/_/g, " ");
   const tone = entry?.[1] ?? "neutral";
   return (
-    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-badge border px-2 py-[5px] text-[12px] font-medium leading-none", TONES[tone], className)}>
+    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-badge px-2.5 py-1.5 text-[12px] font-medium leading-none", TONES[tone], className)}>
       <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
       {label}
     </span>

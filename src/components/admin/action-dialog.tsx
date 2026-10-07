@@ -120,9 +120,9 @@ export function ActionDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[60] bg-ink/30 data-[state=open]:animate-[fade-in_0.2s_ease-out]" />
         <Dialog.Content
-          className={`fixed left-1/2 top-1/2 z-[70] max-h-[92dvh] w-[calc(100%-32px)] ${size === "lg" ? "max-w-[660px]" : "max-w-[480px]"} -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line-2 bg-bg p-7 data-[state=open]:animate-[fade-in_0.15s_ease-out]`}
+          className={`fixed left-1/2 top-1/2 z-[70] max-h-[92dvh] w-[calc(100%-32px)] ${size === "lg" ? "max-w-[660px]" : "max-w-[480px]"} -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-panel border border-black/[0.06] bg-surface p-7 shadow-2 data-[state=open]:animate-[fade-in_0.15s_ease-out]`}
         >
-          <Dialog.Title className="text-[20px] font-semibold tracking-[-0.016em] text-ink">{title}</Dialog.Title>
+          <Dialog.Title className="font-display text-[20px] font-semibold tracking-[-0.016em] text-ink">{title}</Dialog.Title>
           {description ? (
             <Dialog.Description asChild>
               <div className="mt-2.5 text-[14.5px] leading-relaxed text-ink-2">{description}</div>

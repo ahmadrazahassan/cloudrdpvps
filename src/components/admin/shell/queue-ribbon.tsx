@@ -4,8 +4,8 @@ import { countdown } from "@/lib/format";
 import type { ActionQueue } from "@/lib/admin/queries";
 
 /**
- * The console's signature strip: one hairline row under the top bar that always shows what is waiting,
- * and how long the oldest payment has been waiting. Quiet (grey dot, "All clear") when nothing is.
+ * The console's signature strip: one white card at the top of every page that always shows what is waiting,
+ * and how long the oldest payment has been waiting. Quiet (green dot, "All clear") when nothing is.
  */
 export function QueueRibbon({ queue, nowMs, isAdmin }: { queue: ActionQueue; nowMs: number; isAdmin: boolean }) {
   const oldest = queue.oldestPendingPaymentAt ? Math.max(0, nowMs - Date.parse(queue.oldestPendingPaymentAt)) : 0;
@@ -23,8 +23,8 @@ export function QueueRibbon({ queue, nowMs, isAdmin }: { queue: ActionQueue; now
   const waiting = items.filter((i) => i.n > 0);
 
   return (
-    <div className="border-b border-line px-4 sm:px-8 print:hidden" role="region" aria-label="Work waiting">
-      <ul className="flex min-h-[40px] flex-wrap items-center gap-x-6 gap-y-1 py-2 text-[13px]">
+    <div role="region" aria-label="Work waiting" className="print:hidden">
+      <ul className="flex min-h-[52px] flex-wrap items-center gap-x-7 gap-y-2 rounded-panel border border-black/[0.06] bg-surface px-5 py-3.5 text-[13.5px] shadow-1 sm:px-6">
         {waiting.length === 0 ? (
           <li className="flex items-center gap-2 text-muted">
             <Signal tone="ok" />

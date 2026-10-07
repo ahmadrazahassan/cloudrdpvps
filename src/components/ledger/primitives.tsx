@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { Card, CardHeader, StatCard } from "@/components/portal/cards";
 import { cn } from "@/lib/utils";
 
 /**
- * "Ledger" — the shared visual language of the customer dashboard and the admin console.
- * Everything here is flat: hairlines, type, tiny dots and tick marks. No cards, no fills, no shadows.
+ * Small pieces the admin console and the command palette share: status dots, keycaps, section cards, figures.
+ * The console uses the same card surfaces as the customer dashboard (see components/portal/cards).
  */
 
 type SignalTone = "ok" | "warn" | "bad" | "lav" | "muted";
@@ -54,44 +54,41 @@ export function Kbd({ children, className }: { children: ReactNode; className?: 
 }
 
 /**
- * A numbered section: `01  ACTION QUEUE ───────────  aside`.
- * The hairline above and the lavender index give pages a printed-ledger rhythm without any box.
+ * A titled card: the console's basic building block. Title on the left, an optional action or note on the
+ * right. `flush` is for a list or table that runs edge to edge — the header gets a hairline and the body gets no
+ * padding (rows bring their own, see RowList / Row in components/portal/cards).
  */
 export function LedgerSection({
-  n,
   title,
   aside,
   children,
   className,
   id,
+  flush = false,
 }: {
-  n?: number;
   title: ReactNode;
   aside?: ReactNode;
   children: ReactNode;
   className?: string;
   id?: string;
+  flush?: boolean;
 }) {
   const headingId = id ? `${id}-heading` : undefined;
   return (
-    <section id={id} aria-labelledby={headingId} className={cn("border-t border-line pb-10 pt-4", className)}>
-      <header className="mb-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        {n !== undefined && (
-          <span aria-hidden className="num-tabular w-5 text-[12px] font-semibold text-lav-700">
-            {String(n).padStart(2, "0")}
-          </span>
-        )}
-        <h2 id={headingId} className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink">
-          {title}
-        </h2>
-        {aside && <div className="ml-auto text-[13px] text-muted">{aside}</div>}
-      </header>
-      {children}
-    </section>
+    <Card id={id} aria-labelledby={headingId} className={className}>
+      <CardHeader
+        headingId={headingId}
+        divided={flush}
+        title={title}
+        action={typeof aside === "string" ? <span className="text-[13px] text-muted">{aside}</span> : aside}
+        className={flush ? undefined : "pb-4"}
+      />
+      <div className={cn(!flush && "px-5 pb-6 sm:px-6")}>{children}</div>
+    </Card>
   );
 }
 
-/** One large number with a small caption, optionally a link and a change-vs-before marker. */
+/** One headline number as a card tile — see StatCard. Pass `icon` to draw a bare icon in the corner. */
 export function Figure({
   label,
   value,
@@ -99,6 +96,8 @@ export function Figure({
   href,
   delta,
   tone = "default",
+  icon,
+  labelLines,
   className,
 }: {
   label: string;
@@ -108,48 +107,20 @@ export function Figure({
   /** Percentage change versus the previous period; omit when there is nothing to compare. */
   delta?: number | null;
   tone?: "default" | "warn" | "bad";
+  icon?: LucideIcon;
+  labelLines?: 1 | 2;
   className?: string;
 }) {
-  const body = (
-    <>
-      <p className="label-caps">{label}</p>
-      <p
-        className={cn(
-          "num-tabular mt-3 font-display text-[40px] font-[450] leading-none tracking-[-0.035em] md:text-[46px]",
-          tone === "warn" ? "text-warn" : tone === "bad" ? "text-bad" : "text-ink",
-        )}
-      >
-        {value}
-      </p>
-      <p className="mt-3 flex min-h-[20px] items-center gap-2 text-[13px] text-muted">
-        {typeof delta === "number" && Number.isFinite(delta) && (
-          <span className={cn("inline-flex items-center gap-0.5 font-medium", delta >= 0 ? "text-ok" : "text-bad")}>
-            {delta >= 0 ? <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden /> : <ArrowDownRight size={14} strokeWidth={1.75} aria-hidden />}
-            {Math.abs(delta).toFixed(0)}%
-            <span className="sr-only"> versus the previous period</span>
-          </span>
-        )}
-        {note}
-      </p>
-    </>
-  );
-  const base = cn("block min-w-0 px-5 py-5 first:pl-0", className);
-  return href ? (
-    <Link href={href} className={cn(base, "ledger-row group transition-colors hover:bg-black/[0.02]")}>
-      {body}
-    </Link>
-  ) : (
-    <div className={base}>{body}</div>
-  );
+  return <StatCard label={label} value={value} note={note} href={href} delta={delta} tone={tone} icon={icon} labelLines={labelLines} className={className} />;
 }
 
-/** Label / value pairs separated by hairlines — the replacement for "summary cards" in detail rails. */
+/** Label / value pairs separated by hairlines — details in a card or a narrow column. */
 export function Facts({ items, className }: { items: { label: string; value: ReactNode }[]; className?: string }) {
   return (
-    <dl className={cn("divide-y divide-line border-y border-line", className)}>
+    <dl className={cn("divide-y divide-line", className)}>
       {items.map((it) => (
-        <div key={it.label} className="flex items-baseline justify-between gap-6 py-2.5">
-          <dt className="shrink-0 text-[13px] text-muted">{it.label}</dt>
+        <div key={it.label} className="flex items-baseline justify-between gap-6 py-3 first:pt-0 last:pb-0">
+          <dt className="shrink-0 text-[14px] text-muted">{it.label}</dt>
           <dd className="min-w-0 break-words text-right text-[14px] font-medium text-ink">{it.value}</dd>
         </div>
       ))}

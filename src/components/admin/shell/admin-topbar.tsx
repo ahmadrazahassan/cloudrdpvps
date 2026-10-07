@@ -46,24 +46,24 @@ function Crumbs() {
   );
 }
 
-/** 56px bar: menu (phones), breadcrumbs, search / command palette, density. */
+/** 72px bar on the page itself (no band, no rule): menu (phones), breadcrumbs, search / command palette, density. */
 export function AdminTopbar({ user, counts, isAdmin }: { user: AdminMenuUser; counts: NavCounts; isAdmin: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-line bg-bg/85 px-4 backdrop-blur-md sm:px-8 print:hidden">
+    <header className="sticky top-0 z-40 flex h-[72px] items-center gap-3 bg-bg/85 px-4 backdrop-blur-md sm:px-6 lg:px-8 print:hidden">
       <Dialog.Root open={open} onOpenChange={setOpen}>
-        <Dialog.Trigger aria-label="Open menu" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-btn text-ink hover:bg-black/[0.05] lg:hidden">
+        <Dialog.Trigger aria-label="Open menu" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-card text-ink hover:bg-black/[0.05] lg:hidden">
           <Menu size={22} strokeWidth={1.5} aria-hidden />
         </Dialog.Trigger>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-[60] bg-ink/30 data-[state=open]:animate-[fade-in_0.2s_ease-out]" />
-          <Dialog.Content className="fixed inset-y-0 left-0 z-[70] flex w-[86%] max-w-[300px] flex-col border-r border-line bg-bg p-5 data-[state=open]:animate-[sheet-in_0.25s_ease-out]">
+          <Dialog.Content className="fixed inset-y-0 left-0 z-[70] flex w-[86%] max-w-[300px] flex-col rounded-r-panel bg-surface p-5 shadow-2 data-[state=open]:animate-[sheet-in_0.25s_ease-out]">
             <Dialog.Title className="sr-only">Menu</Dialog.Title>
             <Dialog.Description className="sr-only">Console navigation</Dialog.Description>
             <div className="flex items-center justify-between">
               <AdminBrand onNavigate={() => setOpen(false)} />
-              <Dialog.Close className="inline-flex h-10 w-10 items-center justify-center rounded-btn hover:bg-black/[0.05]" aria-label="Close menu">
+              <Dialog.Close className="inline-flex h-10 w-10 items-center justify-center rounded-card hover:bg-black/[0.05]" aria-label="Close menu">
                 <X size={22} strokeWidth={1.5} aria-hidden />
               </Dialog.Close>
             </div>
@@ -80,7 +80,7 @@ export function AdminTopbar({ user, counts, isAdmin }: { user: AdminMenuUser; co
       <Crumbs />
       <div className="ml-auto flex min-w-0 items-center gap-2">
         <div className="w-full min-w-0 max-w-[340px]">
-          <PaletteButton placeholder="Search or jump to…" />
+          <PaletteButton placeholder="Search or jump to…" className="h-11 rounded-card border-black/[0.06] bg-surface shadow-1 hover:border-line-2" />
         </div>
         <DensityToggle />
       </div>

@@ -7,6 +7,7 @@ import { OrderActions } from "@/components/admin/order-actions";
 import { Ago, AdminHeader, Mono } from "@/components/admin/parts";
 import { AdminBadge } from "@/components/admin/status";
 import { Facts, LedgerSection } from "@/components/ledger/primitives";
+import { Card, Row, RowList } from "@/components/portal/cards";
 import { requireConsole } from "@/lib/admin/guard";
 import { displayName, jsonNumber, jsonString } from "@/lib/admin/db";
 import { getOrderDetail } from "@/lib/admin/queries";
@@ -69,10 +70,10 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
         }
       />
 
-      <div className="grid gap-x-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-5">
           {canDeliver && (
-            <LedgerSection id="deliver" n={1} title="Deliver server" aside={order.status === "approved" ? "Paid — waiting for a server" : "Being set up"}>
+            <LedgerSection id="deliver" title="Deliver server" aside={order.status === "approved" ? "Paid — waiting for a server" : "Being set up"}>
               <DeliverForm
                 orderId={order.id}
                 defaultLabel={order.plan_name}
@@ -84,7 +85,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           )}
 
           {delivered && (
-            <LedgerSection n={canDeliver ? 2 : 1} title="Delivered server">
+            <LedgerSection title="Delivered server">
               <p className="text-[15px] text-ink">
                 <Link href={`/admin/services/${delivered.id}`} className="text-link font-semibold">
                   {delivered.label}
@@ -96,7 +97,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             </LedgerSection>
           )}
 
-          <LedgerSection n={(canDeliver ? 1 : 0) + (delivered ? 1 : 0) + 1} title="Items & totals">
+          <LedgerSection title="Items & totals">
             <Facts
               items={[
                 { label: "Plan", value: order.plan_name },
@@ -110,29 +111,29 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             />
           </LedgerSection>
 
-          <LedgerSection n={(canDeliver ? 1 : 0) + (delivered ? 1 : 0) + 2} title="Payments">
+          <LedgerSection flush title="Payments">
             {payments.length === 0 ? (
-              <p className="border-y border-line py-8 text-center text-[14px] text-muted">No proof has been submitted.</p>
+              <p className="px-6 py-12 text-center text-[14px] text-muted">No proof has been submitted.</p>
             ) : (
-              <ul className="border-t border-line">
+              <RowList>
                 {payments.map((p) => (
-                  <li key={p.id} className="ledger-row flex flex-wrap items-center gap-x-5 gap-y-1 border-b border-line py-3 pl-3">
+                  <Row key={p.id} className="flex flex-wrap items-center gap-x-5 gap-y-1">
                     <AdminBadge kind="payment" status={p.status} />
                     <span className="num-tabular text-[14px] font-semibold text-ink">{formatUsd(p.amount_usd_cents, { cents: true })}</span>
                     <span className="text-[13.5px] text-ink-2">{p.method_name}</span>
                     {p.reference && <Mono className="text-[13px] text-muted">{p.reference}</Mono>}
                     <Ago value={p.created_at} nowMs={nowMs} className="text-[13px] text-muted" />
-                    {p.reject_reason && <span className="basis-full text-[13px] text-bad">{p.reject_reason}</span>}
+                    {p.reject_reason && <span className="basis-full text-[13px] text-bad-ink">{p.reject_reason}</span>}
                     <Link href={`/admin/payments?tab=all&p=${p.id}`} className="text-link ml-auto text-[13.5px]">
                       View proof
                     </Link>
-                  </li>
+                  </Row>
                 ))}
-              </ul>
+              </RowList>
             )}
           </LedgerSection>
 
-          <LedgerSection n={(canDeliver ? 1 : 0) + (delivered ? 1 : 0) + 3} title="Timeline">
+          <LedgerSection title="Timeline">
             <ol className="relative">
               {events.map((e, i) => {
                 const reason = jsonString(e.data, "reason");
@@ -157,10 +158,10 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             </ol>
           </LedgerSection>
 
-          <LedgerSection n={(canDeliver ? 1 : 0) + (delivered ? 1 : 0) + 4} title="Internal notes" aside="Staff only">
+          <LedgerSection title="Internal notes" aside="Staff only">
             <NoteForm entityType="order" entityId={order.id} />
             {notes.length > 0 && (
-              <ul className="mt-6 divide-y divide-line border-y border-line">
+              <ul className="mt-6 divide-y divide-line rounded-card border border-line px-4">
                 {notes.map((n) => (
                   <li key={n.id} className="py-3">
                     <p className="whitespace-pre-wrap text-[14.5px] text-ink">{n.body}</p>
@@ -174,39 +175,37 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           </LedgerSection>
         </div>
 
-        <aside className="min-w-0 lg:border-l lg:border-line lg:pl-10" aria-label="Order summary and actions">
-          <div className="space-y-8 pt-4">
-            <div>
-              <p className="label-caps mb-2">Summary</p>
-              <Facts
-                items={[
-                  { label: "Customer", value: customer ? <Link href={`/admin/customers/${customer.id}`} className="hover:text-lav-700">{displayName(customer)}</Link> : "Unknown" },
-                  { label: "Placed", value: <Ago value={order.created_at} nowMs={nowMs} /> },
-                  { label: order.status === "awaiting_payment" || order.status === "rejected" ? "Pay by" : "Deadline", value: formatDateTime(order.expires_at) + " UTC" },
-                  ...(order.completed_at ? [{ label: "Completed", value: formatDateTime(order.completed_at) + " UTC" }] : []),
-                  ...(order.assigned_to ? [{ label: "Handled by", value: actor(order.assigned_to) }] : []),
-                  {
-                    label: "Invoice",
-                    value: invoices[0] ? (
-                      <Link href={`/dashboard/billing/invoices/${invoices[0].id}`} className="hover:text-lav-700">
-                        <Mono>{invoices[0].invoice_number}</Mono>
-                      </Link>
-                    ) : (
-                      <Link href={`/dashboard/orders/${order.id}/invoice`} className="hover:text-lav-700">
-                        Proforma
-                      </Link>
-                    ),
-                  },
-                ]}
-              />
-            </div>
-            {admin && (
-              <div>
-                <p className="label-caps mb-3">Actions</p>
-                <OrderActions orderId={order.id} orderNumber={order.order_number} status={order.status} type={order.type} totalCents={order.total_cents} />
-              </div>
-            )}
-          </div>
+        <aside className="min-w-0 space-y-5" aria-label="Order summary and actions">
+          <Card padded>
+            <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Summary</h2>
+            <Facts
+              items={[
+                { label: "Customer", value: customer ? <Link href={`/admin/customers/${customer.id}`} className="hover:text-lav-700">{displayName(customer)}</Link> : "Unknown" },
+                { label: "Placed", value: <Ago value={order.created_at} nowMs={nowMs} /> },
+                { label: order.status === "awaiting_payment" || order.status === "rejected" ? "Pay by" : "Deadline", value: formatDateTime(order.expires_at) + " UTC" },
+                ...(order.completed_at ? [{ label: "Completed", value: formatDateTime(order.completed_at) + " UTC" }] : []),
+                ...(order.assigned_to ? [{ label: "Handled by", value: actor(order.assigned_to) }] : []),
+                {
+                  label: "Invoice",
+                  value: invoices[0] ? (
+                    <Link href={`/dashboard/billing/invoices/${invoices[0].id}`} className="hover:text-lav-700">
+                      <Mono>{invoices[0].invoice_number}</Mono>
+                    </Link>
+                  ) : (
+                    <Link href={`/dashboard/orders/${order.id}/invoice`} className="hover:text-lav-700">
+                      Proforma
+                    </Link>
+                  ),
+                },
+              ]}
+            />
+          </Card>
+          {admin && (
+            <Card padded>
+              <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Actions</h2>
+              <OrderActions orderId={order.id} orderNumber={order.order_number} status={order.status} type={order.type} totalCents={order.total_cents} />
+            </Card>
+          )}
         </aside>
       </div>
     </>

@@ -132,7 +132,7 @@ export function DeliverForm({
         <span>Use a different expiry (needs a reason)</span>
       </label>
       {custom && (
-        <div className="grid gap-5 border-l-2 border-line-2 pl-5 sm:grid-cols-2">
+        <div className="grid gap-5 rounded-card bg-surface-2 p-5 sm:grid-cols-2">
           <LocalDateTimeField label="Expires at" name="expiresAt" error={fieldError(state, "expiresAt")} />
           <Field label="Reason" {...bind("expiryReason")} autoComplete="off" placeholder="e.g. Paid for 60 days" error={fieldError(state, "expiryReason")} />
         </div>

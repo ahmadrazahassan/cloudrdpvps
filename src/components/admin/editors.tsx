@@ -361,7 +361,7 @@ export function StaffRow({ id, name, role, active, isMe }: { id: string; name: s
             if (!r.ok) setError(r.message);
           })
         }
-        className="h-9 rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] text-ink outline-none hover:border-muted focus:border-lav-600 disabled:opacity-60"
+        className="h-10 rounded-card border border-black/[0.08] bg-surface px-3 text-[14px] text-ink outline-none hover:border-line-2 focus:border-lav-600 disabled:opacity-60"
       >
         <option value="support">Support</option>
         <option value="admin">Admin</option>

@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { Tabs } from "@/components/portal/cards";
+import { ButtonLink } from "@/components/ui/button";
 
 /** Build `/path?a=1&b=2`, dropping empty values and the default page. */
 export function withParams(path: string, params: Record<string, string | number | null | undefined>) {
@@ -13,48 +13,26 @@ export function withParams(path: string, params: Record<string, string | number 
 }
 
 /**
- * Underline filter links (plain server links — the URL is the state, so filters are
- * shareable, bookmarkable and work without JavaScript).
+ * Filter links (plain server links — the URL is the state, so filters are shareable, bookmarkable and work
+ * without JavaScript). Drawn as the dashboard's segmented tabs; `variant="inset"` for use inside a white card.
  */
 export function FilterLinks({
   items,
   current,
   hrefFor,
   label,
+  variant,
 }: {
   items: { id: string; label: string; count?: number }[];
   current: string;
   hrefFor: (id: string) => string;
   label: string;
+  variant?: "page" | "inset";
 }) {
-  return (
-    <nav aria-label={label} className="overflow-x-auto">
-      <ul className="flex min-w-max gap-7 border-b border-line">
-        {items.map((it) => {
-          const active = it.id === current;
-          return (
-            <li key={it.id}>
-              <Link
-                href={hrefFor(it.id)}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative -mb-px inline-flex h-11 items-center gap-2 text-[14px] font-medium transition-colors",
-                  active ? "text-ink" : "text-muted hover:text-ink",
-                )}
-              >
-                {it.label}
-                {it.count !== undefined && <span className="num-tabular text-[12px] text-muted">{it.count}</span>}
-                {active && <span aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 bg-lav-600" />}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
+  return <Tabs items={items} current={current} hrefFor={hrefFor} label={label} variant={variant} />;
 }
 
-/** "Page 2 of 5" with previous/next links. Hidden when there is only one page. */
+/** "Page 2 of 5" with previous/next buttons. Hidden when there is only one page. */
 export function Pagination({
   page,
   pageCount,
@@ -65,31 +43,17 @@ export function Pagination({
   hrefFor: (page: number) => string;
 }) {
   if (pageCount <= 1) return null;
-  const link = "text-link text-[14px]";
-  const off = "text-[14px] text-line-2";
   return (
-    <nav aria-label="Pagination" className="mt-8 flex items-center justify-between border-t border-line pt-5">
-      {page > 1 ? (
-        <Link href={hrefFor(page - 1)} rel="prev" className={link}>
-          ← Previous
-        </Link>
-      ) : (
-        <span aria-hidden className={off}>
-          ← Previous
-        </span>
-      )}
+    <nav aria-label="Pagination" className="flex items-center justify-between gap-4">
+      <ButtonLink href={hrefFor(Math.max(1, page - 1))} variant="secondary" size="sm" disabled={page <= 1} rel="prev">
+        Previous
+      </ButtonLink>
       <p className="num-tabular text-[13px] text-muted">
         Page {page} of {pageCount}
       </p>
-      {page < pageCount ? (
-        <Link href={hrefFor(page + 1)} rel="next" className={link}>
-          Next →
-        </Link>
-      ) : (
-        <span aria-hidden className={off}>
-          Next →
-        </span>
-      )}
+      <ButtonLink href={hrefFor(Math.min(pageCount, page + 1))} variant="secondary" size="sm" disabled={page >= pageCount} rel="next">
+        Next
+      </ButtonLink>
     </nav>
   );
 }

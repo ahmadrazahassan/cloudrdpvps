@@ -53,7 +53,7 @@ export function ConfirmDialog({
       <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[60] bg-ink/30 data-[state=open]:animate-[fade-in_0.2s_ease-out]" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-[70] w-[calc(100%-32px)] max-w-[460px] -translate-x-1/2 -translate-y-1/2 border border-line-2 bg-bg p-7 data-[state=open]:animate-[fade-in_0.15s_ease-out]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-[70] w-[calc(100%-32px)] max-w-[460px] -translate-x-1/2 -translate-y-1/2 rounded-panel border border-black/[0.06] bg-surface p-7 shadow-2 data-[state=open]:animate-[fade-in_0.15s_ease-out]">
           <Dialog.Title className="text-[20px] font-semibold tracking-[-0.016em] text-ink">{title}</Dialog.Title>
           <Dialog.Description asChild>
             <div className="mt-3 text-[15px] leading-relaxed text-ink-2">{description}</div>

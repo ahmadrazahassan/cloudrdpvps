@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { Card } from "@/components/portal/cards";
 import { Button } from "@/components/ui/button";
+import { FIELD } from "@/components/admin/field-class";
 import { savePricing } from "@/lib/admin/actions/catalog";
 import { centsToInput, parseUsdToCents } from "@/lib/admin/money";
 import type { Location, Plan, PlanPricing } from "@/lib/admin/queries-system";
@@ -111,18 +113,18 @@ export function PricingMatrix({ plans, locations, pricing }: { plans: Plan[]; lo
     });
   }
 
-  const input = "h-8 w-[78px] rounded-btn border border-line-2 bg-transparent px-2 text-[13.5px] text-ink outline-none hover:border-muted focus:border-lav-600 num-tabular";
-  const select = "h-8 rounded-btn border border-line-2 bg-transparent px-1.5 text-[12.5px] text-ink-2 outline-none hover:border-muted focus:border-lav-600";
+  const input = "h-9 w-[84px] rounded-[10px] border border-black/[0.08] bg-surface px-2.5 text-[13.5px] text-ink outline-none hover:border-line-2 focus:border-lav-600 focus:outline-2 focus:outline-offset-1 focus:outline-lav-500 num-tabular";
+  const select = "h-9 rounded-[10px] border border-black/[0.08] bg-surface px-2 text-[12.5px] text-ink-2 outline-none hover:border-line-2 focus:border-lav-600 focus:outline-2 focus:outline-offset-1 focus:outline-lav-500";
 
   return (
-    <div className="pb-28">
-      <div className="mb-6 flex flex-wrap items-end gap-3 border-y border-line py-4">
+    <div className="space-y-5">
+      <Card padded className="flex flex-wrap items-end gap-3">
         <p className="label-caps mr-2 self-center">Bulk adjust</p>
         <div>
           <label htmlFor="bulk-scope" className="sr-only">
             Products to adjust
           </label>
-          <select id="bulk-scope" value={scope} onChange={(e) => setScope(e.target.value as "all")} className="h-9 rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] outline-none focus:border-lav-600">
+          <select id="bulk-scope" value={scope} onChange={(e) => setScope(e.target.value as "all")} className={FIELD}>
             <option value="all">All plans</option>
             <option value="rdp">RDP plans</option>
             <option value="vps">VPS plans</option>
@@ -132,7 +134,7 @@ export function PricingMatrix({ plans, locations, pricing }: { plans: Plan[]; lo
           <label htmlFor="bulk-pct" className="sr-only">
             Percent change
           </label>
-          <input id="bulk-pct" value={percent} onChange={(e) => setPercent(e.target.value)} inputMode="decimal" placeholder="± %" className="h-9 w-[84px] rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] outline-none focus:border-lav-600" />
+          <input id="bulk-pct" value={percent} onChange={(e) => setPercent(e.target.value)} inputMode="decimal" placeholder="± %" className={`${FIELD} w-[84px]`} />
         </div>
         <Button size="sm" variant="secondary" onClick={adjust}>
           Apply to prices
@@ -143,26 +145,26 @@ export function PricingMatrix({ plans, locations, pricing }: { plans: Plan[]; lo
             <label htmlFor="grid-country" className="sr-only">
               Find a country in the grid
             </label>
-            <input id="grid-country" type="search" value={countryQuery} onChange={(e) => setCountryQuery(e.target.value)} placeholder={`Find a country (${locations.length})`} className="h-9 w-[220px] rounded-btn border border-line-2 bg-transparent px-2.5 text-[14px] outline-none focus:border-lav-600" />
+            <input id="grid-country" type="search" value={countryQuery} onChange={(e) => setCountryQuery(e.target.value)} placeholder={`Find a country (${locations.length})`} className={`${FIELD} w-[220px]`} />
           </div>
         )}
-      </div>
+      </Card>
       {locations.length > COLUMN_LIMIT && (
-        <p className="-mt-3 mb-5 text-[13px] text-muted" aria-live="polite">
+        <p className="px-1 text-[13px] text-muted" aria-live="polite">
           {countryQuery.trim() ? `${visible.length} of ${locations.length} countries match.` : `Showing the first ${visible.length} of ${locations.length} countries. Search to see another one.`} Edits in countries you don&apos;t see are kept.
         </p>
       )}
 
-      <div className="relative overflow-x-auto" tabIndex={0} role="region" aria-label="Pricing and stock grid">
+      <Card className="relative overflow-x-auto" tabIndex={0} role="region" aria-label="Pricing and stock grid">
         <table className="w-full min-w-[820px] border-collapse text-left text-[13.5px]">
           <caption className="sr-only">Price, stock and availability for every plan in every location</caption>
           <thead>
-            <tr className="border-b border-line-2">
-              <th scope="col" className="label-caps h-9 min-w-[170px] px-3 font-medium">
+            <tr className="border-b border-line bg-surface-2/60">
+              <th scope="col" className="label-caps h-10 min-w-[170px] px-5 font-medium">
                 Plan
               </th>
               {visible.map((l) => (
-                <th key={l.id} scope="col" className="label-caps h-9 min-w-[150px] px-3 font-medium">
+                <th key={l.id} scope="col" className="label-caps h-10 min-w-[150px] px-4 font-medium">
                   {l.name}
                   {!l.is_active && <span className="ml-1 normal-case tracking-normal text-warn">(off)</span>}
                 </th>
@@ -171,8 +173,8 @@ export function PricingMatrix({ plans, locations, pricing }: { plans: Plan[]; lo
           </thead>
           <tbody>
             {plans.map((plan) => (
-              <tr key={plan.id} className="border-b border-line align-top">
-                <th scope="row" className="px-3 py-3 text-left font-normal">
+              <tr key={plan.id} className="border-b border-line align-top last:border-b-0">
+                <th scope="row" className="px-5 py-4 text-left font-normal">
                   <span className="block font-semibold text-ink">{plan.name}</span>
                   <span className="block text-[12px] text-muted">
                     {plan.product.toUpperCase()} · {plan.vcpu} vCPU · {plan.ram_gb} GB{!plan.is_active && " · off"}
@@ -183,7 +185,7 @@ export function PricingMatrix({ plans, locations, pricing }: { plans: Plan[]; lo
                   const changed = !!c && c.price.trim() !== "" && !same(original.get(key(plan.id, loc.id)), c);
                   const invalid = !!c && c.price.trim() !== "" && parseUsdToCents(c.price) === null;
                   return (
-                    <td key={loc.id} className={`px-3 py-3 ${changed ? "border-l-2 border-l-lav-500" : ""}`}>
+                    <td key={loc.id} className={`px-4 py-4 ${changed ? "bg-lav-50" : ""}`}>
                       {c ? (
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-1.5">
@@ -223,18 +225,18 @@ export function PricingMatrix({ plans, locations, pricing }: { plans: Plan[]; lo
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       {saved !== null && (
-        <p role="status" className="form-note mt-6" data-tone="ok">
+        <p role="status" className="form-note" data-tone="ok">
           Saved {saved} price{saved === 1 ? "" : "s"}. The public site is updated.
         </p>
       )}
 
       {(dirty.length > 0 || error) && (
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-line-2 bg-bg px-4 py-3 sm:px-8 lg:left-[248px]" role="region" aria-label="Unsaved pricing changes">
+        <div className="sticky bottom-4 z-30 rounded-panel border border-black/[0.06] bg-surface px-6 py-4 shadow-2" role="region" aria-label="Unsaved pricing changes">
           {review && (
-            <ul className="mx-auto mb-3 max-h-[28vh] max-w-[1360px] divide-y divide-line overflow-y-auto border-b border-line text-[13.5px]">
+            <ul className="mb-3 max-h-[28vh] divide-y divide-line overflow-y-auto border-b border-line text-[13.5px]">
               {dirty.map((d) => {
                 const plan = plans.find((p) => p.id === d.planId)!;
                 const loc = locations.find((l) => l.id === d.locationId)!;
@@ -259,7 +261,7 @@ export function PricingMatrix({ plans, locations, pricing }: { plans: Plan[]; lo
               })}
             </ul>
           )}
-          <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-5 gap-y-2">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <p className="num-tabular text-[14px] font-medium text-ink" aria-live="polite">
               {dirty.length} unsaved change{dirty.length === 1 ? "" : "s"}
             </p>

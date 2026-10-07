@@ -8,6 +8,7 @@ import { ServiceActions } from "@/components/admin/service-actions";
 import { AdminBadge } from "@/components/admin/status";
 import { Facts, LedgerSection } from "@/components/ledger/primitives";
 import { RulerMeter } from "@/components/ledger/ruler-meter";
+import { Card, Row, RowList } from "@/components/portal/cards";
 import { CopyButton } from "@/components/portal/copy-button";
 import { requireConsole } from "@/lib/admin/guard";
 import { displayName, jsonString } from "@/lib/admin/db";
@@ -62,18 +63,18 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
         }
       />
 
-      <div className="grid gap-x-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
-          <LedgerSection n={1} title="Term">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-5">
+          <LedgerSection title="Term">
             <RulerMeter expiresAt={service.expires_at} daysLeft={daysUntil(service.expires_at, nowMs)} />
             {service.status === "suspended" && service.suspended_reason && (
-              <p className="form-note mt-5" data-tone="error">
+              <p className="form-note mt-6" data-tone="error">
                 Suspended: {service.suspended_reason}
               </p>
             )}
           </LedgerSection>
 
-          <LedgerSection n={2} title="Connection" aside={admin ? undefined : "Login details are visible to admins only"}>
+          <LedgerSection title="Connection" aside={admin ? undefined : "Login details are visible to admins only"}>
             <Facts
               items={[
                 { label: "Address", value: <Mono>{ip}{service.rdp_port !== 3389 ? `:${service.rdp_port}` : ""}</Mono> },
@@ -90,10 +91,10 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
             )}
           </LedgerSection>
 
-          <LedgerSection n={3} title="Orders & renewals">
-            <ul className="border-t border-line">
+          <LedgerSection flush title="Orders & renewals">
+            <RowList>
               {orders.map((o) => (
-                <li key={o.id} className="ledger-row flex flex-wrap items-center gap-x-5 gap-y-1 border-b border-line py-3 pl-3">
+                <Row key={o.id} className="flex flex-wrap items-center gap-x-5 gap-y-1">
                   <Link href={`/admin/orders/${o.id}`} className="font-semibold text-ink hover:text-lav-700" data-row-link>
                     <Mono>{o.order_number}</Mono>
                   </Link>
@@ -101,30 +102,30 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   <AdminBadge kind="order" status={o.status} />
                   <span className="num-tabular ml-auto text-[14px] text-ink">{formatUsd(o.total_cents)}</span>
                   <Ago value={o.created_at} nowMs={nowMs} className="text-[13px] text-muted" />
-                </li>
+                </Row>
               ))}
-            </ul>
+            </RowList>
           </LedgerSection>
 
           {tickets.length > 0 && (
-            <LedgerSection n={4} title="Support tickets">
-              <ul className="border-t border-line">
+            <LedgerSection flush title="Support tickets">
+              <RowList>
                 {tickets.map((t) => (
-                  <li key={t.id} className="ledger-row flex items-center gap-4 border-b border-line py-3 pl-3">
+                  <Row key={t.id} className="flex items-center gap-4">
                     <Link href={`/admin/tickets/${t.id}`} className="min-w-0 flex-1 truncate text-[14px] font-medium text-ink hover:text-lav-700" data-row-link>
                       #{t.ticket_no} {t.subject}
                     </Link>
                     <AdminBadge kind="ticket" status={t.status} />
-                  </li>
+                  </Row>
                 ))}
-              </ul>
+              </RowList>
             </LedgerSection>
           )}
 
-          <LedgerSection n={tickets.length > 0 ? 5 : 4} title="Internal notes" aside="Staff only">
+          <LedgerSection title="Internal notes" aside="Staff only">
             <NoteForm entityType="service" entityId={service.id} />
             {notes.length > 0 && (
-              <ul className="mt-6 divide-y divide-line border-y border-line">
+              <ul className="mt-6 divide-y divide-line rounded-card border border-line px-4">
                 {notes.map((n) => (
                   <li key={n.id} className="py-3">
                     <p className="whitespace-pre-wrap text-[14.5px] text-ink">{n.body}</p>
@@ -138,10 +139,10 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
           </LedgerSection>
 
           {admin && audit.length > 0 && (
-            <LedgerSection n={tickets.length > 0 ? 6 : 5} title="Activity">
-              <ol className="border-t border-line">
+            <LedgerSection flush title="Activity">
+              <RowList>
                 {audit.map((a) => (
-                  <li key={a.id} className="flex flex-wrap items-baseline gap-x-3 border-b border-line py-2.5 text-[13.5px]">
+                  <Row key={a.id} className="flex flex-wrap items-baseline gap-x-3 py-3 text-[13.5px]">
                     <span className="min-w-0 flex-1 text-ink">
                       <span className="font-medium">{AUDIT_LABEL[a.action] ?? a.action}</span>
                       {a.reason && <span className="text-muted"> — {a.reason}</span>}
@@ -150,33 +151,31 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                     <span className="text-[12.5px] text-muted">
                       {actor(a.actor_id)} · <Ago value={a.created_at} nowMs={nowMs} />
                     </span>
-                  </li>
+                  </Row>
                 ))}
-              </ol>
+              </RowList>
             </LedgerSection>
           )}
         </div>
 
-        <aside className="min-w-0 lg:border-l lg:border-line lg:pl-10" aria-label="Server summary and actions">
-          <div className="space-y-8 pt-4">
-            <div>
-              <p className="label-caps mb-2">Summary</p>
-              <Facts
-                items={[
-                  { label: "Customer", value: customer ? <Link href={`/admin/customers/${customer.id}`} className="hover:text-lav-700">{displayName(customer)}</Link> : "Unknown" },
-                  { label: "Location", value: orders[0]?.location_name ?? "—" },
-                  { label: "Created", value: <Ago value={service.created_at} nowMs={nowMs} /> },
-                  ...(inventory ? [{ label: "From stock", value: inventory.supplier ?? "Yes" }, ...(inventory.supplier_cost_cents != null ? [{ label: "Supplier cost", value: formatUsd(inventory.supplier_cost_cents, { cents: true }) }] : [])] : []),
-                ]}
-              />
-            </div>
-            {admin && (
-              <div>
-                <p className="label-caps mb-3">Actions</p>
-                <ServiceActions serviceId={service.id} label={service.label} status={service.status} expiresAt={service.expires_at} nowMs={nowMs} termDays={30} />
-              </div>
-            )}
-          </div>
+        <aside className="min-w-0 space-y-5" aria-label="Server summary and actions">
+          <Card padded>
+            <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Summary</h2>
+            <Facts
+              items={[
+                { label: "Customer", value: customer ? <Link href={`/admin/customers/${customer.id}`} className="hover:text-lav-700">{displayName(customer)}</Link> : "Unknown" },
+                { label: "Location", value: orders[0]?.location_name ?? "—" },
+                { label: "Created", value: <Ago value={service.created_at} nowMs={nowMs} /> },
+                ...(inventory ? [{ label: "From stock", value: inventory.supplier ?? "Yes" }, ...(inventory.supplier_cost_cents != null ? [{ label: "Supplier cost", value: formatUsd(inventory.supplier_cost_cents, { cents: true }) }] : [])] : []),
+              ]}
+            />
+          </Card>
+          {admin && (
+            <Card padded>
+              <h2 className="mb-4 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Actions</h2>
+              <ServiceActions serviceId={service.id} label={service.label} status={service.status} expiresAt={service.expires_at} nowMs={nowMs} termDays={30} />
+            </Card>
+          )}
         </aside>
       </div>
     </>

@@ -6,6 +6,7 @@ import { AdminBadge } from "@/components/admin/status";
 import { ProofViewer } from "@/components/admin/proof-viewer";
 import { ReviewPanel } from "@/components/admin/review-panel";
 import { Facts, Signal } from "@/components/ledger/primitives";
+import { Card, RowList } from "@/components/portal/cards";
 import { FilterLinks, Pagination, pageParam, param, withParams } from "@/components/portal/list-controls";
 import { requireConsole } from "@/lib/admin/guard";
 import { getPaymentDetail, isPaymentTab, listPaymentQueue, PAYMENT_TABS, type PaymentTab } from "@/lib/admin/queries";
@@ -56,71 +57,77 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         items={PAYMENT_TABS.map((t) => ({ id: t.id, label: t.label, count: queue.counts[t.id] }))}
       />
 
-      <div className="mt-6 grid gap-x-10 lg:grid-cols-[360px_minmax(0,1fr)]">
+      <div className="grid items-start gap-5 lg:grid-cols-[380px_minmax(0,1fr)]">
         {/* Queue */}
-        <section aria-label="Payment queue" className={cn("min-w-0", explicit && "hidden lg:block")}>
-          {queue.items.length === 0 ? (
-            <p className="border-y border-line py-14 text-center text-[14px] text-muted">
-              {tab === "pending" ? "Nothing waiting for review. Nice." : "No payments here."}
-            </p>
-          ) : (
-            <ul className="border-t border-line">
-              {queue.items.map(({ payment, order, customer, duplicate }) => {
-                const a = age(nowMs - Date.parse(payment.created_at));
-                const active = payment.id === selectedId;
-                return (
-                  <li key={payment.id} className="ledger-row border-b border-line" data-active={active || undefined}>
-                    <Link
-                      href={hrefFor(payment.id)}
-                      data-row-link
-                      aria-current={active ? "true" : undefined}
-                      className="flex items-center gap-3 py-3 pl-3 pr-1 outline-offset-[-2px]"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="flex items-center gap-2 text-[14px] font-semibold text-ink">
-                          <Mono>{order?.order_number ?? "—"}</Mono>
-                          {duplicate && (
-                            <span title="This proof file was used on another payment">
-                              <DuplicateIcon size={14} strokeWidth={1.75} aria-hidden className="text-warn" />
-                              <span className="sr-only">Possible duplicate</span>
-                            </span>
-                          )}
-                        </p>
-                        <p className="truncate text-[13px] text-ink-2">{displayName(customer)}</p>
-                        <p className="truncate text-[12px] text-muted">{payment.method_name}</p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="num-tabular text-[14px] font-semibold text-ink">{formatUsd(payment.amount_usd_cents)}</p>
-                        {payment.status === "pending" ? (
-                          <p className="mt-1 flex items-center justify-end gap-1.5 text-[12px] text-muted">
-                            <Signal tone={a.tone} pulse={a.tone === "bad"} />
-                            <span className="num-tabular">{a.label}</span>
-                            <span className="sr-only"> waiting</span>
+        <section aria-label="Payment queue" className={cn("min-w-0 space-y-5", explicit && "hidden lg:block")}>
+          <Card className="overflow-hidden">
+            {queue.items.length === 0 ? (
+              <p role="status" className="px-6 py-16 text-center text-[14px] text-muted">
+                {tab === "pending" ? "Nothing waiting for review. Nice." : "No payments here."}
+              </p>
+            ) : (
+              <RowList>
+                {queue.items.map(({ payment, order, customer, duplicate }) => {
+                  const a = age(nowMs - Date.parse(payment.created_at));
+                  const active = payment.id === selectedId;
+                  return (
+                    <li key={payment.id} className="ledger-row" data-active={active || undefined}>
+                      <Link
+                        href={hrefFor(payment.id)}
+                        data-row-link
+                        aria-current={active ? "true" : undefined}
+                        className="flex items-center gap-3 px-5 py-4 outline-offset-[-2px]"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="flex items-center gap-2 text-[14px] font-semibold text-ink">
+                            <Mono>{order?.order_number ?? "—"}</Mono>
+                            {duplicate && (
+                              <span title="This proof file was used on another payment">
+                                <DuplicateIcon size={14} strokeWidth={1.75} aria-hidden className="text-warn" />
+                                <span className="sr-only">Possible duplicate</span>
+                              </span>
+                            )}
                           </p>
-                        ) : (
-                          <div className="mt-1">
-                            <AdminBadge kind="payment" status={payment.status} />
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+                          <p className="truncate text-[13px] text-ink-2">{displayName(customer)}</p>
+                          <p className="truncate text-[12px] text-muted">{payment.method_name}</p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p className="num-tabular text-[14px] font-semibold text-ink">{formatUsd(payment.amount_usd_cents)}</p>
+                          {payment.status === "pending" ? (
+                            <p className="mt-1 flex items-center justify-end gap-1.5 text-[12px] text-muted">
+                              <Signal tone={a.tone} pulse={a.tone === "bad"} />
+                              <span className="num-tabular">{a.label}</span>
+                              <span className="sr-only"> waiting</span>
+                            </p>
+                          ) : (
+                            <div className="mt-1">
+                              <AdminBadge kind="payment" status={payment.status} />
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </RowList>
+            )}
+          </Card>
           <Pagination page={queue.page} pageCount={queue.pageCount} hrefFor={(n) => hrefFor(null, { page: n })} />
         </section>
 
         {/* Detail */}
-        <section aria-label="Payment detail" className={cn("min-w-0 lg:border-l lg:border-line lg:pl-10", !explicit && "hidden lg:block")}>
+        <section aria-label="Payment detail" className={cn("min-w-0", !explicit && "hidden lg:block")}>
           {explicit && (
             <Link href={hrefFor(null, { p: null })} className="mb-5 inline-flex items-center gap-2 text-[14px] text-ink-2 hover:text-ink lg:hidden">
               <ArrowLeft size={16} strokeWidth={1.5} aria-hidden /> Back to the queue
             </Link>
           )}
           {!detail ? (
-            <p className="py-14 text-center text-[14px] text-muted">{explicit ? "That payment couldn't be found." : "Choose a payment to review it."}</p>
+            <Card padded>
+              <p role="status" className="py-12 text-center text-[14px] text-muted">
+                {explicit ? "That payment couldn't be found." : "Choose a payment to review it."}
+              </p>
+            </Card>
           ) : (
             <PaymentDetail key={detail.payment.id} detail={detail} admin={admin} nowMs={nowMs} />
           )}
@@ -139,9 +146,9 @@ function PaymentDetail({ detail, admin, nowMs }: { detail: NonNullable<Awaited<R
       : "Paid in USD";
 
   return (
-    <div className="space-y-8">
+    <Card padded className="space-y-7">
       <div className="flex flex-wrap items-center gap-3">
-        <h2 className="text-[22px] font-semibold tracking-[-0.018em] text-ink">
+        <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-ink">
           <Mono>{order?.order_number ?? "Payment"}</Mono>
         </h2>
         <AdminBadge kind="payment" status={payment.status} />
@@ -154,7 +161,7 @@ function PaymentDetail({ detail, admin, nowMs }: { detail: NonNullable<Awaited<R
       </div>
 
       {duplicates.length > 0 && (
-        <div role="alert" className="form-note" data-tone="error">
+        <div role="alert" className="rounded-card bg-bad-bg px-4 py-3 text-[14px] leading-relaxed text-ink">
           This proof matches {duplicates.length === 1 ? "another payment" : `${duplicates.length} other payments`}:{" "}
           {duplicates.map((d, i) => (
             <span key={d.id}>
@@ -202,10 +209,10 @@ function PaymentDetail({ detail, admin, nowMs }: { detail: NonNullable<Awaited<R
 
       {siblings.length > 0 && (
         <div>
-          <p className="label-caps mb-2">Earlier attempts on this order</p>
-          <ul className="divide-y divide-line border-y border-line text-[13.5px]">
+          <p className="mb-2 text-[13px] font-medium text-muted">Earlier attempts on this order</p>
+          <ul className="divide-y divide-line rounded-card border border-line px-4 text-[13.5px]">
             {siblings.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-4 py-2">
+              <li key={s.id} className="flex items-center justify-between gap-4 py-2.5">
                 <span className="text-muted">{formatDateTime(s.created_at)}</span>
                 <span className="min-w-0 flex-1 truncate text-ink-2">{s.reject_reason ?? ""}</span>
                 <AdminBadge kind="payment" status={s.status} />
@@ -218,8 +225,8 @@ function PaymentDetail({ detail, admin, nowMs }: { detail: NonNullable<Awaited<R
       {pending && order && admin ? (
         <ReviewPanel paymentId={payment.id} orderNumber={order.order_number} orderType={order.type} expectedCents={payment.amount_usd_cents} />
       ) : pending ? (
-        <p className="form-note">Only admins can approve or reject payments. You can read the proof and open the order.</p>
+        <p className="rounded-card bg-surface-2 px-4 py-3 text-[14px] text-ink-2">Only admins can approve or reject payments. You can read the proof and open the order.</p>
       ) : null}
-    </div>
+    </Card>
   );
 }

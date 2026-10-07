@@ -78,11 +78,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
     <>
       <AdminHeader title="Invoices" description="Issued automatically when a payment is approved. Open one to view or print it." />
       <FilterLinks label="Invoice status" current={view} hrefFor={(id) => withParams("/admin/invoices", { view: id === "all" ? null : id, q })} items={VIEWS.map((v) => ({ id: v.id, label: v.label }))} />
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar action="/admin/invoices" q={q} keep={{ view: view === "all" ? undefined : view }} placeholder="Invoice number or customer" />
         <ResultCount total={data.total} noun="invoice" />
       </div>
-      <div className="mt-4">
+      <div>
         <DataTable rows={data.items} columns={columns} rowKey={(r) => r.invoice.id} label="Invoices" empty="No invoices match." />
       </div>
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/invoices", { view: view === "all" ? null : view, q, page: n })} />

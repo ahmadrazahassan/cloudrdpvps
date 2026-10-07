@@ -79,10 +79,10 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
   /* Admin table density: compact by default, "comfortable" via the toggle (html[data-density]). */
-  --row-h: 36px;
+  --row-h: 44px;
 }
 html[data-density="comfortable"] {
-  --row-h: 48px;
+  --row-h: 56px;
 }
 
 body {
@@ -296,45 +296,18 @@ body {
     animation: signal-ring 2s ease-out infinite;
   }
 
-  /* Table / list rows: a 2px lavender rail slides in on hover and keyboard focus. */
+  /* Table / list rows: a soft grey wash on hover and keyboard focus; the selected row (aria-selected, data-active)
+     is tinted lavender. Used by the console's tables and lists and by the command palette. */
   .ledger-row {
-    position: relative;
+    transition: background-color 0.12s ease;
   }
-  .ledger-row::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 2px;
-    background: var(--color-lav-500);
-    opacity: 0;
-    transition: opacity 0.12s ease;
-    pointer-events: none;
+  .ledger-row:hover,
+  .ledger-row:focus-within {
+    background-color: rgb(247 247 248 / 0.8);
   }
-  .ledger-row:hover::before,
-  .ledger-row:focus-within::before,
-  .ledger-row[aria-selected="true"]::before,
-  .ledger-row[data-active="true"]::before {
-    opacity: 1;
-  }
-  tr.ledger-row::before {
-    display: none; /* a pseudo-element can't be absolutely positioned against a <tr>; cells draw the rail instead */
-  }
-  tr.ledger-row > :first-child {
-    position: relative;
-  }
-  tr.ledger-row > :first-child::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 2px;
-    background: var(--color-lav-500);
-    opacity: 0;
-    transition: opacity 0.12s ease;
-  }
-  tr.ledger-row:hover > :first-child::before,
-  tr.ledger-row:focus-within > :first-child::before,
-  tr.ledger-row[data-active="true"] > :first-child::before {
-    opacity: 1;
+  .ledger-row[aria-selected="true"],
+  .ledger-row[data-active="true"] {
+    background-color: var(--color-lav-50);
   }
 
   /* Flat grey pulse — no shimmer gradient */

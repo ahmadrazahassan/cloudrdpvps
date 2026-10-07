@@ -2,8 +2,8 @@ import { formatUsd } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 /**
- * Charts drawn with plain elements: flat lavender fills, hairline gridlines, tabular numbers.
- * No chart library, no gradients, no shadows — they read like the rest of the console.
+ * Charts drawn with plain elements: solid lavender fills, soft rounded bars, hairline gridlines, tabular numbers.
+ * No chart library and no gradients — they sit inside the console's white cards.
  */
 
 const shortDay = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
@@ -37,7 +37,7 @@ export function DayBars({ points, label }: { points: { day: string; cents: numbe
               <span
                 key={p.day}
                 title={`${shortDay(p.day)} · ${formatUsd(p.cents)}`}
-                className={cn("min-w-[2px] flex-1 rounded-t-[1px]", p.cents > 0 ? "bg-lav-500 hover:bg-lav-700" : "bg-line-2")}
+                className={cn("min-w-[2px] flex-1 rounded-t-[3px] transition-colors", p.cents > 0 ? "bg-lav-400 hover:bg-lav-600" : "bg-line")}
                 style={{ height: p.cents > 0 ? `${Math.max(2, (p.cents / max) * 100)}%` : "1px" }}
               />
             ))}
@@ -58,7 +58,7 @@ export function BarList({ items, empty = "No data in this range.", unit = "" }: 
   if (items.length === 0) return <p className="py-3 text-[14px] text-muted">{empty}</p>;
   const max = Math.max(...items.map((i) => i.count));
   return (
-    <ul className="space-y-3.5">
+    <ul className="space-y-4">
       {items.map((i) => (
         <li key={i.label}>
           <div className="flex items-baseline justify-between gap-4 text-[13.5px]">
@@ -68,8 +68,8 @@ export function BarList({ items, empty = "No data in this range.", unit = "" }: 
               {unit}
             </span>
           </div>
-          <div className="mt-1.5 h-[3px] bg-line" aria-hidden>
-            <div className="h-full bg-lav-500" style={{ width: `${Math.max(3, (i.count / max) * 100)}%` }} />
+          <div className="mt-2 h-1.5 rounded-full bg-lav-100" aria-hidden>
+            <div className="h-full rounded-full bg-lav-500" style={{ width: `${Math.max(3, (i.count / max) * 100)}%` }} />
           </div>
         </li>
       ))}
@@ -84,15 +84,15 @@ export function SplitBar({ items }: { items: { label: string; count: number }[] 
   const shades = ["bg-lav-600", "bg-lav-300", "bg-lav-200"];
   return (
     <div>
-      <div className="flex h-3 gap-[2px]" role="img" aria-label={items.map((i) => `${i.label} ${i.count}`).join(", ")}>
+      <div className="flex h-3 gap-[3px]" role="img" aria-label={items.map((i) => `${i.label} ${i.count}`).join(", ")}>
         {items.map((i, n) => (
-          <span key={i.label} className={cn("h-full", shades[n % shades.length])} style={{ width: `${(i.count / total) * 100}%` }} />
+          <span key={i.label} className={cn("h-full first:rounded-l-full last:rounded-r-full", shades[n % shades.length])} style={{ width: `${(i.count / total) * 100}%` }} />
         ))}
       </div>
       <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[13.5px]">
         {items.map((i, n) => (
           <li key={i.label} className="flex items-center gap-2">
-            <span aria-hidden className={cn("h-2 w-2", shades[n % shades.length])} />
+            <span aria-hidden className={cn("h-2 w-2 rounded-full", shades[n % shades.length])} />
             <span className="text-ink">{i.label}</span>
             <span className="num-tabular font-semibold text-ink">{i.count}</span>
             <span className="num-tabular text-muted">{Math.round((i.count / total) * 100)}%</span>

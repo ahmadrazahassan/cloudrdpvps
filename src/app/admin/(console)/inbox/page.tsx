@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Ago, AdminHeader } from "@/components/admin/parts";
 import { InboxActions } from "@/components/admin/inbox-actions";
 import { AdminBadge } from "@/components/admin/status";
+import { Card } from "@/components/portal/cards";
 import { FilterLinks, Pagination, pageParam, param, withParams } from "@/components/portal/list-controls";
 import { requireConsole } from "@/lib/admin/guard";
 import { listInbox, type InboxView } from "@/lib/admin/queries";
@@ -31,44 +32,44 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
       <AdminHeader title="Inbox" description="Messages from the public contact form. Reply by email, or open the customer if they have an account." />
       <FilterLinks label="Inbox view" current={view} hrefFor={(id) => withParams("/admin/inbox", { view: id === "unread" ? null : id })} items={VIEWS.map((v) => ({ id: v.id, label: v.label }))} />
 
-      <div className="mt-6">
-        {data.items.length === 0 ? (
-          <p className="border-y border-line py-14 text-center text-[14px] text-muted">{view === "unread" ? "No unread messages." : "No messages here."}</p>
-        ) : (
-          <ul className="border-t border-line">
-            {data.items.map(({ message: m, accountId }) => (
-              <li key={m.id} className="ledger-row border-b border-line py-5 pl-4">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="text-[15px] font-semibold text-ink">{m.name}</span>
-                  <a href={`mailto:${m.email}`} className="text-[13.5px] text-lav-700 hover:text-lav-900">
-                    {m.email}
-                  </a>
-                  {m.topic && <span className="label-caps !text-[11px]">{m.topic}</span>}
-                  <AdminBadge kind="inbox" status={m.status} />
-                  <time dateTime={m.created_at} title={`${formatDateTime(m.created_at)} UTC`} className="ml-auto text-[12.5px] text-muted">
-                    <Ago value={m.created_at} nowMs={nowMs} />
-                  </time>
-                </div>
-                <p className="mt-2.5 max-w-[78ch] whitespace-pre-wrap break-words text-[14.5px] leading-relaxed text-ink">{m.message}</p>
-                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-                  <a
-                    href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.topic ?? "your message"}`)}`}
-                    className="btn btn-secondary btn-sm"
-                  >
-                    Reply by email
-                  </a>
-                  {accountId && (
-                    <Link href={`/admin/customers/${accountId}`} className="text-link text-[13.5px]">
-                      Open customer
-                    </Link>
-                  )}
-                  <InboxActions messageId={m.id} status={m.status} />
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {data.items.length === 0 ? (
+        <Card padded>
+          <p className="py-8 text-center text-[14px] text-muted">{view === "unread" ? "No unread messages." : "No messages here."}</p>
+        </Card>
+      ) : (
+        <div className="space-y-5">
+          {data.items.map(({ message: m, accountId }) => (
+            <Card key={m.id} padded as="article">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span className="text-[15px] font-semibold text-ink">{m.name}</span>
+                <a href={`mailto:${m.email}`} className="text-[13.5px] text-lav-700 hover:text-lav-900">
+                  {m.email}
+                </a>
+                {m.topic && <span className="label-caps !text-[11px]">{m.topic}</span>}
+                <AdminBadge kind="inbox" status={m.status} />
+                <time dateTime={m.created_at} title={`${formatDateTime(m.created_at)} UTC`} className="ml-auto text-[12.5px] text-muted">
+                  <Ago value={m.created_at} nowMs={nowMs} />
+                </time>
+              </div>
+              <p className="mt-3 max-w-[78ch] whitespace-pre-wrap break-words text-[14.5px] leading-relaxed text-ink">{m.message}</p>
+              <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-4">
+                <a
+                  href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.topic ?? "your message"}`)}`}
+                  className="btn btn-secondary btn-sm"
+                >
+                  Reply by email
+                </a>
+                {accountId && (
+                  <Link href={`/admin/customers/${accountId}`} className="text-link text-[13.5px]">
+                    Open customer
+                  </Link>
+                )}
+                <InboxActions messageId={m.id} status={m.status} />
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
       <Pagination page={data.page} pageCount={data.pageCount} hrefFor={(n) => withParams("/admin/inbox", { view: view === "unread" ? null : view, page: n })} />
     </>
   );
