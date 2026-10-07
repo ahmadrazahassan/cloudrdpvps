@@ -1,11 +1,10 @@
-import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { SiteImage } from "@/components/shared/site-image";
-import { ButtonLink } from "@/components/ui/button";
 import { getCatalog, minPriceCents } from "@/lib/catalog";
 import { getSiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
+import { HeaderAuthActions } from "./auth-actions";
 import { MainNav } from "./main-nav";
 import { MobileNav } from "./mobile-nav";
 
@@ -40,9 +39,9 @@ export async function SiteHeader() {
         </div>
       )}
       <header className="sticky top-0 z-50 border-b border-line bg-bg/85 backdrop-blur-md">
-        <div className="container-site flex h-16 items-stretch justify-between gap-6 xl:h-[72px]">
+        <div className="container-site flex h-16 items-stretch justify-between gap-3 sm:gap-6 xl:h-[72px]">
           <div className="flex items-stretch gap-6">
-            <Logo className="self-center" />
+            <Logo className="site-logo self-center" />
             <MainNav
               rdpFrom={rdpFrom}
               vpsFrom={vpsFrom}
@@ -51,13 +50,7 @@ export async function SiteHeader() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <ButtonLink href="/login" variant="ghost" size="sm" className="hidden sm:inline-flex">
-              Log in
-            </ButtonLink>
-            <ButtonLink href="/#pricing" size="sm" className="hidden sm:inline-flex">
-              Get started
-              <ArrowRight size={14} strokeWidth={2} aria-hidden />
-            </ButtonLink>
+            <HeaderAuthActions />
             <MobileNav rdpFrom={rdpFrom} vpsFrom={vpsFrom} />
           </div>
         </div>

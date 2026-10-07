@@ -510,3 +510,20 @@ body {
     break-inside: avoid;
   }
 }
+
+/*
+ * Account buttons on the public pages. Both the signed-out and signed-in versions are in the (static) HTML;
+ * <html data-auth="in"> is set in the browser from the session cookie (src/lib/auth-hint.ts) and picks one.
+ */
+html[data-auth="in"] [data-auth-show="out"] {
+  display: none !important;
+}
+html:not([data-auth="in"]) [data-auth-show="in"] {
+  display: none !important;
+}
+/* On phones a signed-in visitor also gets a "Dashboard" button in the bar, so the wordmark steps down to make room. */
+@media (max-width: 639px) {
+  html[data-auth="in"] .site-logo > * {
+    width: 156px !important;
+  }
+}

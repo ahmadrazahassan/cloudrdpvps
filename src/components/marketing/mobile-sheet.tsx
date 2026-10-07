@@ -86,12 +86,21 @@ export default function MobileSheet({
             ))}
           </nav>
 
-          <div className="mt-4 grid gap-3 border-t border-line pt-5">
+          {/* Signed out / signed in: both are rendered, the stylesheet shows one (see lib/auth-hint.ts). */}
+          <div data-auth-show="out" className="mt-4 grid gap-3 border-t border-line pt-5">
             <ButtonLink href="/#pricing" size="lg" onClick={close}>
               Get started
             </ButtonLink>
             <ButtonLink href="/login" variant="secondary" size="lg" onClick={close}>
               Log in
+            </ButtonLink>
+          </div>
+          <div data-auth-show="in" className="mt-4 grid gap-3 border-t border-line pt-5">
+            <ButtonLink href="/dashboard" size="lg" onClick={close}>
+              Dashboard
+            </ButtonLink>
+            <ButtonLink href="/order/new" variant="secondary" size="lg" onClick={close}>
+              Order a server
             </ButtonLink>
           </div>
         </Dialog.Content>

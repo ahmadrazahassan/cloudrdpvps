@@ -105,12 +105,17 @@ export async function SiteFooter() {
                 <p className={colHead}>Company</p>
                 <ul className="mt-5 space-y-3">
                   {nav.footer.Company.map((l) => (
-                    <li key={l.label}>
+                    <li key={l.label} data-auth-show={l.href === "/login" ? "out" : undefined}>
                       <Link href={l.href} className={colLink}>
                         {l.label}
                       </Link>
                     </li>
                   ))}
+                  <li data-auth-show="in">
+                    <Link href="/dashboard" className={colLink}>
+                      Dashboard
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div className="col-span-2 sm:col-span-1">

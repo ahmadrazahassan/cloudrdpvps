@@ -69,6 +69,8 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${interTight.variable}`}
+      // an inline script sets data-auth before React loads (see lib/auth-hint.ts)
+      suppressHydrationWarning
     >
       <body>
         <noscript>
