@@ -63,12 +63,12 @@ The app's emails are queued by the database inside the same transaction as the e
 
 **Set it up once**
 
-1. **Resend** → Domains → add your sending domain and add the DNS records it shows (SPF, DKIM). Wait until it says *Verified*. Then API Keys → create a key with **Sending access**.
+1. **Resend** → Domains → add your sending domain — best a subdomain such as `mail.yourdomain.com`, so your main domain's reputation stays separate — and add the DNS records it shows (SPF, DKIM, and the return-path record). Wait until it says *Verified*. Then API Keys → create a key with **Sending access**.
 2. **Your host's environment** (e.g. Vercel → Settings → Environment Variables), then redeploy:
-   `RESEND_API_KEY=re_…` and `EMAIL_FROM="Cloud RDP VPS <no-reply@yourdomain.com>"` (an address on the verified domain). Also set `CRON_SECRET` (min 24 chars) so retries can run.
+   `RESEND_API_KEY=re_…` and `EMAIL_FROM="Cloud RDP VPS <hello@mail.yourdomain.com>"` (an address on the verified domain; see *Keeping email out of spam* for why not `no-reply`). Also set `CRON_SECRET` (min 24 chars) so retries can run.
 3. **Supabase** → Authentication → SMTP Settings → enable custom SMTP:
    host `smtp.resend.com`, port `465`, username `resend`, password = the same API key, sender = the address from `EMAIL_FROM`.
-4. **Supabase** → Authentication → Email Templates: paste each file from `supabase/templates/` and set the subject:
+4. **Supabase** → Authentication → Email Templates: paste each file from `supabase/templates/` and set the subject (the files are generated from `src/lib/email/auth-emails.ts` — change the wording there and run `npm run emails:build`):
 
    | Template | File | Subject |
    |---|---|---|
@@ -81,6 +81,22 @@ The app's emails are queued by the database inside the same transaction as the e
 
 5. **Supabase** → Authentication → URL Configuration: Site URL = your live address, no trailing slash (the templates build their links from it).
 6. **Check it**: Admin → Settings → **Send test email**, then register a new account with a real address and confirm it. You should receive the confirmation email, then the welcome email.
+
+### Keeping email out of spam
+
+The messages are built to pass filters (plain wording, a text version of every email, one image, one link, no tracking, a clear reason and a way to reach us in the footer — `src/lib/email/deliverability.test.ts` checks all of it). What decides the rest is your sending domain, and only you can set that up:
+
+1. **SPF + DKIM** — added in step 1; Resend shows *Verified* only when both pass.
+2. **DMARC** — add a TXT record at `_dmarc.mail.yourdomain.com` (or `_dmarc.yourdomain.com` if you send from the main domain): `v=DMARC1; p=none; rua=mailto:you@yourdomain.com`. `p=none` only reports; once the reports are clean for a few weeks, move to `p=quarantine`. Gmail and Yahoo expect DMARC from everyone who sends to them.
+3. **A domain you own** — never send from `@gmail.com`, `@outlook.com` or any free-mail address: DMARC fails and mail is rejected or spammed.
+4. **Same domain everywhere** — `EMAIL_FROM`, the Supabase SMTP sender and the site's address should all share your domain.
+5. **A real, monitored sender** — use something like `hello@` or `support@`, not `no-reply@`. Replies are a positive signal for Gmail, and the app already sets Reply-To to your support email (Admin → Settings).
+6. **Tracking off** — in Resend → Domains → your domain, leave *open tracking* and *click tracking* **off**. Rewritten links are a common spam signal, and the emails only contain links to your own site.
+7. **Fill in Admin → Settings** — support email and company details appear in every footer (a real name and address build trust and are required by anti-spam law for commercial mail).
+8. **Check before launch** — send a test email (Admin → Settings → **Send test email**) to a Gmail address, open it → ⋮ → *Show original*, and confirm **SPF: PASS**, **DKIM: PASS**, **DMARC: PASS**. For a score, send one to the address shown at mail-tester.com (aim for 9/10 or better).
+9. **Start gently** — a brand-new domain has no reputation. Send real, expected emails (order and account emails are), keep the volume steady, and don't import or mail lists of people who haven't signed up.
+
+Bounces and spam complaints are handled by Resend (it stops sending to an address that bounces). If an email shows *failed* in the outbox with a "Resend 4xx" error, the address was refused; the app won't retry it.
 
 ## Supabase runbook
 

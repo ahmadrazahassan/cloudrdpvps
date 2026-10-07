@@ -160,7 +160,7 @@ export const resetPassword = formAction({
     await supabase.auth.signOut({ scope: "others" });
     await clearPendingEmail();
     // Tell them, so a reset they didn't ask for doesn't go unnoticed.
-    if (user && (await enqueueEmail({ userId: user.id, to: user.email, template: "password_changed" }))) drainSoon();
+    if (user && (await enqueueEmail({ userId: user.id, to: user.email, template: "password_changed", data: { at: new Date().toISOString() } }))) drainSoon();
     redirect("/dashboard?notice=password-updated");
   },
 });

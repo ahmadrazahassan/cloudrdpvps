@@ -47,7 +47,7 @@ export async function drainEmailOutbox(limit = 25): Promise<DrainResult> {
       continue;
     }
 
-    const sent = await sendEmail({ to: row.to_email, ...mail, replyTo: ctx.supportEmail });
+    const sent = await sendEmail({ to: row.to_email, ...mail, replyTo: ctx.supportEmail, headers: { "X-Entity-Ref-ID": row.id } });
     if (sent.ok) {
       await db.from("email_outbox").update({ status: "sent", sent_at: new Date().toISOString(), last_error: null }).eq("id", row.id);
       result.sent += 1;

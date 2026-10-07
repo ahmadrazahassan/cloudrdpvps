@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { AUTH_EMAILS, renderAuthEmail } from "./auth-emails";
 import { renderEmail, type EmailContext } from "./templates";
 
 const ctx: EmailContext = { siteName: "Cloud RDP VPS", siteUrl: "https://example.com", supportEmail: null };
@@ -42,6 +43,12 @@ describe("supabase/templates", () => {
     expect(files.sort()).toEqual(["change-email.html", "confirm-signup.html", "invite.html", "magic-link.html", "reauthentication.html", "reset-password.html"]);
   });
 
+  it("is up to date with src/lib/email/auth-emails.ts (run `npm run emails:build` if this fails)", () => {
+    for (const email of AUTH_EMAILS) {
+      expect(readFileSync(path.join(dir, email.file), "utf8"), email.file).toBe(renderAuthEmail(email));
+    }
+  });
+
   it.each(files)("%s only uses placeholders Supabase provides, and a valid confirm link or code", (file) => {
     const html = readFileSync(path.join(dir, file), "utf8");
     const used = [...html.matchAll(/\{\{\s*([^}\s]*)\s*\}\}/g)].map((m) => m[1]!);
@@ -54,6 +61,6 @@ describe("supabase/templates", () => {
       // Same shape as /auth/confirm expects: token_hash + a type it accepts + a same-site next.
       expect(html).toMatch(/\{\{ \.SiteURL \}\}\/auth\/confirm\?token_hash=\{\{ \.TokenHash \}\}&amp;type=(signup|recovery|email_change|invite|magiclink)&amp;next=\//);
     }
-    expect(html).toContain("/brand/logo-black.png");
+    expect(html).toContain("/brand/email-logo.png");
   });
 });

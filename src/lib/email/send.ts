@@ -7,6 +7,8 @@ export interface OutgoingEmail {
   text: string;
   html: string;
   replyTo?: string | null;
+  /** Extra headers, e.g. a unique X-Entity-Ref-ID so Gmail never folds two messages into one. */
+  headers?: Record<string, string>;
 }
 
 export type SendResult = { ok: true } | { ok: false; error: string; /** true when retrying can't help (bad address, rejected content) */ permanent: boolean };
@@ -28,7 +30,7 @@ export async function sendEmail(mail: OutgoingEmail): Promise<SendResult> {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: env.EMAIL_FROM, to: [mail.to], subject: mail.subject, text: mail.text, html: mail.html, ...(mail.replyTo ? { reply_to: mail.replyTo } : {}) }),
+      body: JSON.stringify({ from: env.EMAIL_FROM, to: [mail.to], subject: mail.subject, text: mail.text, html: mail.html, ...(mail.replyTo ? { reply_to: mail.replyTo } : {}), ...(mail.headers ? { headers: mail.headers } : {}) }),
       signal: AbortSignal.timeout(15_000),
     });
     if (res.ok) return { ok: true };

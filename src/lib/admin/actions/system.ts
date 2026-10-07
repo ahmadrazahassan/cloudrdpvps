@@ -6,9 +6,9 @@ import { action } from "@/lib/action";
 import { AppError, fromDbError } from "@/lib/errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CATALOG_TAG } from "@/lib/supabase/public";
+import { loadEmailContext } from "@/lib/email/context";
 import { emailConfigured, sendEmail } from "@/lib/email/send";
 import { renderEmail } from "@/lib/email/templates";
-import { publicEnv } from "@/lib/env";
 import { serverEnv } from "@/lib/env.server";
 import { uuid } from "@/lib/validation";
 import { normalizeWhatsAppInput } from "@/lib/whatsapp";
@@ -105,11 +105,11 @@ export const sendTestEmail = action({
   auth: "admin",
   rateLimit: { limit: 5, window: "10 m" },
   schema: z.object({}),
-  async handler(_input, { user }) {
+  async handler(_input, { user, supabase }) {
     if (!emailConfigured()) {
       throw new AppError("UNAVAILABLE", "Email isn't set up yet. Add RESEND_API_KEY and EMAIL_FROM to the server's environment.");
     }
-    const mail = renderEmail("test", {}, { siteName: "Cloud RDP VPS", siteUrl: publicEnv.siteUrl, supportEmail: null });
+    const mail = renderEmail("test", {}, await loadEmailContext(supabase));
     const sent = await sendEmail({ to: user!.email, ...mail! });
     if (!sent.ok) throw new AppError("INTERNAL", `The email provider refused it: ${sent.error}`);
     return { to: user!.email };

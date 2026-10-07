@@ -70,7 +70,7 @@ export const changePassword = formAction({
     if (error) throw fromAuthError(error);
     await supabase.auth.signOut({ scope: "others" });
     // Tell them, so a change they didn't make doesn't go unnoticed.
-    if (await enqueueEmail({ userId: user!.id, to: user!.email, template: "password_changed" })) drainSoon();
+    if (await enqueueEmail({ userId: user!.id, to: user!.email, template: "password_changed", data: { at: new Date().toISOString() } })) drainSoon();
     return { changed: true as const };
   },
 });

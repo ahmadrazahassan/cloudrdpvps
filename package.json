@@ -26,6 +26,7 @@
     "globe:build": "node scripts/build-globe.mjs",
     "icons:build": "node scripts/build-icons.mjs",
     "brand:build": "node scripts/build-brand.mjs",
+    "emails:build": "tsx scripts/build-emails.ts",
     "payments:build": "node scripts/build-payment-logos.mjs",
     "faqs:sync": "tsx --env-file-if-exists=.env.local scripts/sync-faqs.ts",
     "qa:admin": "node scripts/qa/portal-check.mjs"

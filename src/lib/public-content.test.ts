@@ -40,9 +40,10 @@ describe("renderEmail", () => {
   it("greets a new customer by first name and never mentions a password they'd receive", () => {
     const mail = renderEmail("welcome", { name: "Aisha Khan" }, ctx)!;
     expect(mail.subject).toBe("Welcome to Cloud RDP VPS");
-    expect(mail.text).toMatch(/^Hi Aisha, your account is ready\./);
+    expect(mail.text).toMatch(/^Welcome, Aisha\n\nHi Aisha, your account is ready\./);
     expect(mail.text).toContain("https://example.com/order/new");
-    expect(renderEmail("welcome", {}, ctx)!.text).toMatch(/^Your account is ready\./); // no name on file: no "Hi ,"
+    const anonymous = renderEmail("welcome", {}, ctx)!.text;
+    expect(anonymous).toMatch(/^Welcome to Cloud RDP VPS\n\nYour account is ready\./); // no name on file: no "Hi ,"
   });
 
   it("uses a logo file that exists", () => {
