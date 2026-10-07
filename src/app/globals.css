@@ -41,6 +41,7 @@
   --color-bad: #c23b3b;
   --color-bad-bg: #fbe7e7;
   --color-bad-soft: #f4a8a8; /* error text on the dark footer (8:1 on ink) */
+  --color-bad-ink: #b03030; /* red text on --color-bad-bg (5.3:1; plain --color-bad is 4.4:1 there) */
 
   /* shape */
   --radius-btn: 10px;

@@ -40,12 +40,13 @@ const LABEL: Record<StepState, string> = {
   todo: "text-muted",
   bad: "text-bad",
 };
-const NODE: Record<StepState, string> = {
+/** Hollow nodes are filled with the colour of whatever the stepper sits on, so the track never shows through. */
+const NODE = (surface: "page" | "card"): Record<StepState, string> => ({
   done: "h-3 w-3 border-lav-600 bg-lav-600",
-  current: "h-3.5 w-3.5 border-lav-600 bg-bg",
-  todo: "h-3 w-3 border-line-2 bg-bg",
+  current: cn("h-3.5 w-3.5 border-lav-600", surface === "card" ? "bg-surface" : "bg-bg"),
+  todo: cn("h-3 w-3 border-line-2", surface === "card" ? "bg-surface" : "bg-bg"),
   bad: "h-3 w-3 border-bad bg-bad",
-};
+});
 const STATE_TEXT: Record<StepState, string> = {
   done: "completed",
   current: "current step",
@@ -60,7 +61,19 @@ const STATE_TEXT: Record<StepState, string> = {
  *
  * Used for the checkout (Configure → Review → Pay) and for tracking an order after it is placed.
  */
-export function OrderSteps({ steps, label, className }: { steps: OrderStep[]; label: string; className?: string }) {
+export function OrderSteps({
+  steps,
+  label,
+  className,
+  surface = "page",
+}: {
+  steps: OrderStep[];
+  label: string;
+  className?: string;
+  /** What the stepper sits on: the grey page (checkout) or a white card (the dashboard). */
+  surface?: "page" | "card";
+}) {
+  const node = NODE(surface);
   return (
     <ol
       aria-label={label}
@@ -84,7 +97,7 @@ export function OrderSteps({ steps, label, className }: { steps: OrderStep[]; la
             <div aria-hidden className="relative mt-4 h-4 w-full">
               {!first && <span className={cn("absolute left-0 right-1/2 top-1/2 h-0.5 -translate-y-1/2", lineIn ? "bg-lav-600" : "bg-line-2")} />}
               {!last && <span className={cn("absolute left-1/2 right-0 top-1/2 h-0.5 -translate-y-1/2", lineOut ? "bg-lav-600" : "bg-line-2")} />}
-              <span className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2", NODE[s.state])} />
+              <span className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2", node[s.state])} />
             </div>
             {s.meta ? <p className="num-tabular mt-3 px-1 text-[12px] leading-snug text-muted sm:text-[13px]">{s.meta}</p> : null}
           </li>

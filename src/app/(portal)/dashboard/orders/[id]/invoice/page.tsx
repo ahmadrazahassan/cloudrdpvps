@@ -38,7 +38,7 @@ export default async function OrderInvoicePage({ params }: Props) {
 
   return (
     <>
-      <div className="mx-auto mb-8 flex max-w-[820px] flex-wrap items-center justify-between gap-4 print:hidden">
+      <div className="mx-auto mb-5 flex max-w-[860px] flex-wrap items-center justify-between gap-4 print:hidden">
         <Link href={`/dashboard/orders/${order.id}`} className="text-link text-[14px]">
           ← Back to order
         </Link>

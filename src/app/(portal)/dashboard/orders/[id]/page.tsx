@@ -5,9 +5,10 @@ import { WindowsLogo, WindowsOs } from "@/components/brand/windows-logo";
 import { CancelOrderButton } from "@/components/portal/cancel-order-button";
 import { LocalTime } from "@/components/portal/local-time";
 import { OrderTracker } from "@/components/portal/order-tracker";
+import { Card, FactGrid, SummaryList } from "@/components/portal/cards";
 import { PageHeader, Section } from "@/components/portal/page-header";
 import { StatusBadge } from "@/components/portal/status-badge";
-import { CountryFlag, SpecList } from "@/components/shared/primitives";
+import { CountryFlag } from "@/components/shared/primitives";
 import { ButtonLink } from "@/components/ui/button";
 import { getCatalog } from "@/lib/catalog";
 import { now as clock } from "@/lib/clock";
@@ -71,59 +72,49 @@ export default async function OrderPage({ params }: Props) {
       />
 
       {/* Track your order — centred, full width, above the details */}
-      <section aria-label="Order progress" className="mb-12 border-y border-line py-10">
+      <Card padded aria-label="Order progress" className="mb-5 py-8 sm:py-10">
         <OrderTracker steps={tracker} className="mx-auto max-w-[900px]" />
         {rejectedNote && (
-          <p className="form-note mx-auto mt-8 max-w-[640px]" data-tone="error">
+          <p role="status" className="mx-auto mt-8 max-w-[640px] rounded-card bg-bad-bg px-4 py-3 text-[14px] leading-relaxed text-ink">
             {rejectedNote}
           </p>
         )}
         {expired && (
-          <p className="form-note mx-auto mt-8 max-w-[640px]" data-tone="error">
+          <p role="status" className="mx-auto mt-8 max-w-[640px] rounded-card bg-bad-bg px-4 py-3 text-[14px] leading-relaxed text-ink">
             This order wasn&apos;t paid in time and was cancelled automatically. Nothing was charged.
           </p>
         )}
-      </section>
+      </Card>
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16">
-        <div>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-5">
           {latest && (
-            <Section title="Payment">
-              <dl className="border-t border-line">
-                {[
-                  { k: "Method", v: latest.method_name },
-                  { k: "Amount", v: formatUsd(latest.amount_usd_cents, { cents: true }) + " USD" },
+            <Section title="Payment" description="The most recent payment you submitted for this order.">
+              <FactGrid
+                items={[
+                  { label: "Method", value: latest.method_name },
+                  { label: "Amount", value: formatUsd(latest.amount_usd_cents, { cents: true }) + " USD" },
                   ...(latest.quoted_amount && latest.quoted_currency
-                    ? [{ k: "Quoted", v: `${latest.quoted_amount} ${latest.quoted_currency}` }]
+                    ? [{ label: "Quoted", value: `${latest.quoted_amount} ${latest.quoted_currency}` }]
                     : []),
-                  ...(latest.reference ? [{ k: "Reference", v: latest.reference }] : []),
-                  { k: "Submitted", v: <LocalTime value={latest.created_at} /> },
-                ].map((r) => (
-                  <div key={r.k} className="grid gap-1 border-b border-line py-3.5 sm:grid-cols-[150px_1fr] sm:gap-6">
-                    <dt className="label-caps">{r.k}</dt>
-                    <dd className="data-id text-[15px] font-medium text-ink">{r.v}</dd>
-                  </div>
-                ))}
-                <div className="grid gap-1 border-b border-line py-3.5 sm:grid-cols-[150px_1fr] sm:gap-6">
-                  <dt className="label-caps">Status</dt>
-                  <dd>
-                    <StatusBadge kind="payment" status={latest.status} />
-                  </dd>
-                </div>
-              </dl>
+                  ...(latest.reference ? [{ label: "Reference", value: latest.reference }] : []),
+                  { label: "Submitted", value: <LocalTime value={latest.created_at} /> },
+                  { label: "Status", value: <StatusBadge kind="payment" status={latest.status} /> },
+                ]}
+              />
 
               {latest.status === "rejected" && (latest.reject_message ?? latest.reject_reason) && (
-                <p className="form-note mt-5" data-tone="error">
+                <p role="status" className="mt-4 rounded-card bg-bad-bg px-4 py-3 text-[14px] leading-relaxed text-ink">
                   {latest.reject_message ?? latest.reject_reason}
                 </p>
               )}
 
               {proofUrl && (
                 <div className="mt-6">
-                  <p className="label-caps">Your proof</p>
+                  <p className="text-[13px] font-medium text-muted">Your proof</p>
                   {latest.proof_mime?.startsWith("image/") ? (
                     // eslint-disable-next-line @next/next/no-img-element -- a 60-second signed URL; not optimisable
-                    <img src={proofUrl} alt="Payment proof you uploaded" className="mt-3 max-h-[260px] max-w-full border border-line object-contain" />
+                    <img src={proofUrl} alt="Payment proof you uploaded" className="mt-3 max-h-[260px] max-w-full rounded-card border border-line object-contain" />
                   ) : (
                     <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="text-link mt-3 inline-block text-[15px]">
                       Open your proof (PDF)
@@ -164,21 +155,21 @@ export default async function OrderPage({ params }: Props) {
           </Section>
         </div>
 
-        <aside aria-label="Order summary" className="border-t border-line pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-          <p className="label-caps">Order summary</p>
-          <h2 className="mt-4 text-[22px] font-semibold tracking-[-0.016em] text-ink">{order.plan_name}</h2>
+        <Card as="aside" padded aria-label="Order summary" className="self-start">
+          <p className="text-[13px] font-medium text-muted">Order summary</p>
+          <h2 className="mt-2 font-display text-[22px] font-semibold tracking-[-0.02em] text-ink">{order.plan_name}</h2>
           <p className="mt-2 flex items-center gap-2 text-[14px] text-muted">
             <WindowsLogo size={15} />
             {order.product === "rdp" ? "Windows RDP" : "Windows VPS"}
           </p>
-          <p className="mt-3 flex items-center gap-2 text-[14px] text-ink-2">
+          <p className="mt-2 flex items-center gap-2 text-[14px] text-ink-2">
             {location && <CountryFlag iso2={location.iso2} />}
             {order.location_name}
           </p>
-          <p className="num-tabular mt-3 text-[13px] leading-relaxed text-muted">{specLine(order.plan_specs)}</p>
-          <SpecList
+          <p className="num-tabular mt-2 text-[13px] leading-relaxed text-muted">{specLine(order.plan_specs)}</p>
+          <SummaryList
             className="mt-5 border-t border-line"
-            rows={[
+            items={[
               { label: "Type", value: order.type === "renewal" ? "Renewal" : "New server" },
               { label: "Operating system", value: <WindowsOs size={14} /> },
               { label: "Term", value: `${order.term_days} days` },
@@ -186,16 +177,16 @@ export default async function OrderPage({ params }: Props) {
               ...(order.discount_cents > 0
                 ? [{ label: `Coupon${order.coupon_code ? ` ${order.coupon_code}` : ""}`, value: `−${formatUsd(order.discount_cents, { cents: true })}` }]
                 : []),
-              { label: "Total", value: <strong>{formatUsd(order.total_cents, { cents: true })}</strong> },
+              { label: "Total", value: <strong className="text-[16px]">{formatUsd(order.total_cents, { cents: true })}</strong> },
             ]}
           />
-          <p className="mt-6 text-[13px] text-muted">
+          <p className="mt-5 border-t border-line pt-5 text-[13px] text-muted">
             Questions about this order?{" "}
             <Link href="/dashboard/tickets/new" className="text-link">
               Contact support
             </Link>
           </p>
-        </aside>
+        </Card>
       </div>
     </>
   );

@@ -24,5 +24,5 @@ export function OrderTracker({ steps, className }: { steps: TrackerStep[]; class
     state: s.state,
     meta: s.at ? <LocalTime value={s.at} dateOnly /> : s.hint || (s.state === "done" ? "Done" : undefined),
   }));
-  return <OrderSteps label="Order progress" steps={items} className={className} />;
+  return <OrderSteps label="Order progress" steps={items} className={className} surface="card" />;
 }

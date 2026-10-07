@@ -33,18 +33,18 @@ const TICKET: Record<string, { label: string; tone: Tone }> = {
 const TABLES = { order: ORDER, payment: PAYMENT, service: SERVICE, ticket: TICKET } as const;
 
 const TONES: Record<Tone, string> = {
-  neutral: "text-ink-2 border-line-2",
-  lavender: "text-lav-700 border-lav-300",
-  warn: "text-warn border-warn/40",
-  bad: "text-bad border-bad/40",
-  ok: "text-ok border-ok/40",
+  neutral: "bg-bg text-ink-2",
+  lavender: "bg-lav-100 text-lav-800",
+  warn: "bg-warn-bg text-warn",
+  bad: "bg-bad-bg text-bad-ink",
+  ok: "bg-ok-bg text-ok",
 };
 
 export function statusLabel(kind: keyof typeof TABLES, status: string) {
   return TABLES[kind][status]?.label ?? status.replace(/_/g, " ");
 }
 
-/** A 6px-radius outline with a small round dot — flat, never filled. */
+/** A soft-tinted 6px-radius badge with a small round dot. The tint is the status colour at ~10%; the text keeps AA contrast on it. */
 export function StatusBadge({
   kind,
   status,
@@ -58,7 +58,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-badge border px-2 py-1 text-[12px] font-medium leading-none",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-badge px-2.5 py-1.5 text-[12px] font-medium leading-none",
         TONES[entry.tone],
         className,
       )}

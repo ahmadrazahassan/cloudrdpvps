@@ -19,7 +19,7 @@ export function NewTicketForm({
   const [state, formAction, pending] = useActionState(createTicket, null);
 
   return (
-    <form action={formAction} className="max-w-[640px] space-y-5" noValidate>
+    <form action={formAction} className="space-y-5" noValidate>
       <FormError state={state} />
       <Field label="Subject" name="subject" required maxLength={200} autoFocus error={fieldError(state, "subject")} />
       <div className="grid gap-5 sm:grid-cols-2">

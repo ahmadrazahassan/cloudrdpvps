@@ -1,17 +1,33 @@
 import Link from "next/link";
-import { CountryFlag, Tag } from "@/components/shared/primitives";
+import { CountryFlag } from "@/components/shared/primitives";
 import { ButtonLink } from "@/components/ui/button";
 import type { Location } from "@/content/catalog";
 import { specLine } from "@/lib/format";
 import { serviceState } from "@/lib/portal/derive";
 import type { Service } from "@/lib/portal/queries";
+import { Row, TableHead } from "./cards";
 import { CopyButton } from "./copy-button";
 import { ExpiryMeter } from "./expiry-meter";
 import { StatusBadge } from "./status-badge";
 
+/** Column layout shared by the header and every row (desktop); on phones each row stacks. */
+const COLS = "md:grid-cols-[minmax(0,1.35fr)_132px_minmax(0,1.15fr)_minmax(0,1.25fr)_auto]";
+
+export function ServiceTableHead() {
+  return (
+    <TableHead className={COLS}>
+      <span>Server</span>
+      <span>Status</span>
+      <span>Address</span>
+      <span>Term</span>
+      <span className="w-[148px]" />
+    </TableHead>
+  );
+}
+
 /**
- * One server as an open row: name and place on the left, specs and address in the
- * middle, the term meter, and the actions. Rows are separated by hairlines — no card.
+ * One server as a table row: name and place, status, address with its specs, the term ruler, and the
+ * actions. Place it in a `RowList` inside a card (under a `ServiceTableHead`).
  */
 export function ServiceRow({
   service,
@@ -26,38 +42,40 @@ export function ServiceRow({
   const canRenew = state.status === "active" || state.status === "expired";
 
   return (
-    <li className="grid gap-5 border-b border-line py-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1.1fr)_minmax(0,1fr)_176px] md:items-center md:gap-8">
+    <Row className={COLS}>
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <Tag tone="neutral">{service.product.toUpperCase()}</Tag>
-          {location && (
-            <span className="inline-flex items-center gap-1.5 text-[13px] text-ink-2">
-              <CountryFlag iso2={location.iso2} />
-              {location.name}
-            </span>
-          )}
-        </div>
-        <h3 className="mt-2.5 truncate text-[18px] font-semibold tracking-[-0.012em] text-ink">
+        <h3 className="truncate text-[16px] font-semibold tracking-[-0.012em] text-ink">
           <Link href={`/dashboard/services/${service.id}`} className="hover:text-lav-700">
             {service.label}
           </Link>
         </h3>
-        <div className="mt-2">
-          <StatusBadge kind="service" status={state.status} />
-        </div>
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
+          {location && (
+            <span className="inline-flex items-center gap-1.5">
+              <CountryFlag iso2={location.iso2} />
+              {location.name}
+            </span>
+          )}
+          <span aria-hidden>·</span>
+          <span>{service.product === "rdp" ? "Windows RDP" : "Windows VPS"}</span>
+        </p>
+      </div>
+
+      <div>
+        <StatusBadge kind="service" status={state.status} />
       </div>
 
       <div className="min-w-0">
-        <p className="num-tabular text-[13px] text-muted">{specLine(service.plan_specs)}</p>
-        <p className="data-id mt-1.5 flex items-center gap-1 text-[15px] font-medium text-ink">
+        <p className="data-id flex items-center gap-1 text-[15px] font-medium text-ink">
           {String(service.ip)}
           <CopyButton value={String(service.ip)} label={`Copy IP address of ${service.label}`} />
         </p>
+        <p className="num-tabular text-[12px] text-muted">{specLine(service.plan_specs)}</p>
       </div>
 
       <ExpiryMeter expiresAt={service.expires_at} daysLeft={state.daysLeft} />
 
-      <div className="flex gap-2 md:justify-end">
+      <div className="flex gap-2 md:w-[148px] md:justify-end">
         <ButtonLink href={`/dashboard/services/${service.id}`} variant="secondary" size="sm">
           Open
         </ButtonLink>
@@ -67,6 +85,6 @@ export function ServiceRow({
           </ButtonLink>
         )}
       </div>
-    </li>
+    </Row>
   );
 }

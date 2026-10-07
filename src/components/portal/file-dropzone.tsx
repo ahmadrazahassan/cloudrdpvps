@@ -105,8 +105,8 @@ export function FileDropzone({
           accept(Array.from(e.dataTransfer.files));
         }}
         className={cn(
-          "rounded-btn border border-dashed px-5 py-7 text-center transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-lav-500",
-          dragging ? "border-lav-600" : shown ? "border-bad" : "border-line-2 hover:border-muted",
+          "rounded-card border border-dashed bg-surface-2/60 px-5 py-8 text-center transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-lav-500",
+          dragging ? "border-lav-600 bg-lav-50" : shown ? "border-bad" : "border-line-2 hover:border-muted",
         )}
       >
         <Upload size={22} strokeWidth={1.5} aria-hidden className="mx-auto text-lav-600" />
@@ -133,9 +133,9 @@ export function FileDropzone({
       </div>
 
       {entries.length > 0 && (
-        <ul className="mt-3 border-t border-line">
+        <ul className="mt-3 divide-y divide-line rounded-card border border-line px-3">
           {entries.map((e, i) => (
-            <li key={`${e.file.name}:${e.file.size}:${e.file.lastModified}`} className="flex items-center gap-3 border-b border-line py-2.5">
+            <li key={`${e.file.name}:${e.file.size}:${e.file.lastModified}`} className="flex items-center gap-3 py-2.5">
               {e.preview ? (
                 // eslint-disable-next-line @next/next/no-img-element -- a local blob preview; next/image can't optimise it
                 <img src={e.preview} alt="" className="h-10 w-10 shrink-0 rounded-[6px] object-cover" />

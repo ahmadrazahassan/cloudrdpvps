@@ -25,7 +25,7 @@ const ICONS: Record<string, LucideIcon> = {
   ticket_reply: LifeBuoy,
 };
 
-/** One notification row: bare icon, title, body, relative time. Unread ones are bold with a lavender dot. */
+/** One notification row: bare icon, title, body, relative time. Unread ones are bold, lightly tinted and carry a lavender dot. */
 export function NotificationItem({ n, now }: { n: Notification; now?: number }) {
   const Icon = ICONS[n.type] ?? Bell;
   const unread = !n.read_at;
@@ -44,11 +44,11 @@ export function NotificationItem({ n, now }: { n: Notification; now?: number }) 
     </>
   );
 
-  const cls = "flex items-start gap-4 border-b border-line py-4";
+  const cls = cn("flex items-start gap-4 px-5 py-4 sm:px-6", unread && "bg-lav-50/70");
   return (
     <li>
       {n.link ? (
-        <Link href={n.link} className={cn(cls, "transition-colors hover:bg-black/[0.02]")}>
+        <Link href={n.link} className={cn(cls, "transition-colors hover:bg-surface-2")}>
           {inner}
         </Link>
       ) : (

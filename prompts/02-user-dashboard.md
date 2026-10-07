@@ -7,6 +7,8 @@
 
 > **FLAT-SURFACE RULE (overrides everything below — see file 01 §1 rule 11).** No cards, panels, tiles, filled/tinted blocks, image or texture backgrounds, and no background behind a background. Wherever this file says "card", "white card", "panel", "frame" or "filled block", build an open section on `#F1F1F1` separated by 1px hairlines (`.ruled-wrap` / `.ruled`, divided columns, underline tabs). Inputs are transparent with a 1px border. Lavender is an accent only. Illustrations sit directly on the page.
 
+> **CARD-SURFACE UPDATE (supersedes the FLAT-SURFACE RULE for the signed-in dashboard only).** The customer dashboard now uses white cards on the `#F1F1F1` page, as in the design references: `rounded-panel` (20px), a 6% black hairline, `shadow-1`; 20px between cards (16px on phones) and 24px inside them (20px on phones). Building blocks live in `src/components/portal/cards.tsx` (`Card`, `CardHeader`, `StatCard`, `Tabs`, `RowList`/`Row`/`TableHead`, `PagerBar`, `FactGrid`, `SummaryList`, `SearchForm`) and `charts.tsx` (`TermChart`, `HealthGauge`). Still binding: bare icons with **no chip, circle or tile behind them**, lavender as the only brand hue, **solid fills only (no gradients outside `buttons.css`)**, Inter / Inter Tight only, 10px buttons. The marketing site, auth screens and the admin console keep the flat "ledger" style (`src/components/ledger`); do not use the portal cards there.
+
 ---
 
 ## 1. Scope & routes

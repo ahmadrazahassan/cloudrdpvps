@@ -10,6 +10,7 @@ import { PaymentLogo } from "@/components/shared/payment-logo";
 import { Field, TextareaField } from "@/components/ui/field";
 import { formatUsd } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { Card, CardHeader } from "./cards";
 import { CopyButton } from "./copy-button";
 import { FileDropzone } from "./file-dropzone";
 
@@ -78,7 +79,7 @@ export function PaymentFlow({
 
   if (methods.length === 0) {
     return (
-      <div className="border-l-2 border-warn pl-4">
+      <Card padded role="status">
         <p className="text-[16px] font-semibold text-ink">Payment methods aren&apos;t available yet.</p>
         <p className="mt-1.5 max-w-[56ch] text-[15px] leading-relaxed text-ink-2">
           Your order is saved. We&apos;ll let you know as soon as you can pay. If you need help in the meantime, open a
@@ -89,7 +90,7 @@ export function PaymentFlow({
             Contact support
           </Link>
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -98,29 +99,27 @@ export function PaymentFlow({
   const networkDetail = method?.type === "crypto" ? method.details.find((d) => /network/i.test(d.label)) : undefined;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-5">
       {rejectionMessage !== undefined && rejectionMessage !== null && (
-        <div role="alert" className="border-l-2 border-bad pl-4">
-          <p className="text-[16px] font-semibold text-bad">Your last payment proof was rejected.</p>
+        <div role="alert" className="rounded-card bg-bad-bg px-5 py-4">
+          <p className="text-[16px] font-semibold text-bad-ink">Your last payment proof was rejected.</p>
           <p className="mt-1.5 max-w-[60ch] text-[15px] leading-relaxed text-ink-2">{rejectionMessage}</p>
-          <p className="mt-1.5 text-[14px] text-muted">Check the details below and submit new proof.</p>
+          <p className="mt-1.5 text-[14px] text-ink-2">Check the details below and submit new proof.</p>
         </div>
       )}
 
       {/* 01 — choose a method */}
-      <section aria-labelledby="step-method">
-        <h2 id="step-method" className="flex items-baseline gap-3 text-[19px] font-semibold tracking-[-0.014em] text-ink">
-          <span className="num-tabular label-caps">01</span>Choose a payment method
-        </h2>
-        <div role="radiogroup" aria-labelledby="step-method" className="mt-5 border-t border-line">
+      <Card aria-labelledby="step-method">
+        <CardHeader headingId="step-method" divided title={<StepTitle n="01">Choose a payment method</StepTitle>} />
+        <div role="radiogroup" aria-labelledby="step-method" className="grid gap-3 p-5 sm:p-6">
           {visible.map((m) => {
             const checked = m.id === chosenId;
             return (
               <label
                 key={m.id}
                 className={cn(
-                  "relative flex cursor-pointer items-center gap-4 border-b border-line py-4 pl-5 pr-2 hover:bg-black/[0.02]",
-                  checked && "before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-lav-600",
+                  "flex cursor-pointer items-center gap-4 rounded-card border p-4 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-lav-500",
+                  checked ? "border-lav-600 bg-lav-50" : "border-line hover:border-line-2 hover:bg-surface-2",
                 )}
               >
                 <input
@@ -129,7 +128,7 @@ export function PaymentFlow({
                   value={m.id}
                   checked={checked}
                   onChange={() => setChosenId(m.id)}
-                  className="h-[18px] w-[18px] shrink-0 accent-lav-600"
+                  className="h-[18px] w-[18px] shrink-0 accent-lav-600 focus-visible:outline-none"
                 />
                 <span className="flex h-8 w-12 shrink-0 items-center justify-center">
                   <PaymentLogo name={m.name} type={m.type} className="max-w-full object-contain" />
@@ -145,88 +144,86 @@ export function PaymentFlow({
             );
           })}
         </div>
-      </section>
+      </Card>
 
       {method && (
-        <form action={formAction} className="space-y-12" noValidate>
+        <form action={formAction} className="space-y-5" noValidate>
           <input type="hidden" name="orderId" value={orderId} />
           <input type="hidden" name="methodId" value={method.id} />
 
           {/* 02 — send the money */}
-          <section aria-labelledby="step-send">
-            <h2 id="step-send" className="flex items-baseline gap-3 text-[19px] font-semibold tracking-[-0.014em] text-ink">
-              <span className="num-tabular label-caps">02</span>Send your payment
-            </h2>
+          <Card aria-labelledby="step-send">
+            <CardHeader headingId="step-send" divided title={<StepTitle n="02">Send your payment</StepTitle>} />
+            <div className="space-y-5 p-5 sm:p-6">
+              <div className="rounded-card bg-lav-50 px-5 py-4">
+                <p className="text-[13px] font-medium text-lav-800">Amount to send</p>
+                {localAmount !== null && method.currencyCode ? (
+                  <>
+                    <p className="num-tabular mt-2 flex items-center gap-1 font-display text-[32px] font-medium leading-none tracking-[-0.028em] text-ink">
+                      {money(localAmount, method.currencyCode)}
+                      <CopyButton value={String(localAmount)} label="Copy amount" />
+                    </p>
+                    <p className="num-tabular mt-2 text-[13px] text-ink-2">
+                      {formatUsd(totalCents, { cents: true })} USD at 1 USD = {method.ratePerUsd} {method.currencyCode}
+                    </p>
+                  </>
+                ) : (
+                  <p className="num-tabular mt-2 flex items-center gap-1 font-display text-[32px] font-medium leading-none tracking-[-0.028em] text-ink">
+                    {formatUsd(totalCents, { cents: true })} <span className="text-[16px] text-muted">USD</span>
+                    <CopyButton value={(totalCents / 100).toFixed(2)} label="Copy amount" />
+                  </p>
+                )}
+              </div>
 
-            <div className="mt-5 border-y border-line py-5">
-              <p className="label-caps">Amount to send</p>
-              {localAmount !== null && method.currencyCode ? (
-                <>
-                  <p className="num-tabular mt-2 flex items-center gap-1 font-display text-[30px] font-medium leading-none tracking-[-0.025em] text-ink">
-                    {money(localAmount, method.currencyCode)}
-                    <CopyButton value={String(localAmount)} label="Copy amount" />
-                  </p>
-                  <p className="num-tabular mt-2 text-[13px] text-muted">
-                    {formatUsd(totalCents, { cents: true })} USD at 1 USD = {method.ratePerUsd} {method.currencyCode}
-                  </p>
-                </>
-              ) : (
-                <p className="num-tabular mt-2 flex items-center gap-1 font-display text-[30px] font-medium leading-none tracking-[-0.025em] text-ink">
-                  {formatUsd(totalCents, { cents: true })} <span className="text-[16px] text-muted">USD</span>
-                  <CopyButton value={(totalCents / 100).toFixed(2)} label="Copy amount" />
+              {networkDetail && (
+                <p className="flex items-start gap-2.5 rounded-card bg-warn-bg px-4 py-3 text-[14px] font-medium text-warn">
+                  <AlertTriangle size={18} strokeWidth={1.75} aria-hidden className="mt-0.5 shrink-0" />
+                  Send only on {networkDetail.value}. Funds sent on any other network cannot be recovered.
                 </p>
               )}
-            </div>
 
-            {networkDetail && (
-              <p className="mt-4 flex items-start gap-2.5 text-[14px] font-medium text-warn">
-                <AlertTriangle size={18} strokeWidth={1.75} aria-hidden className="mt-0.5 shrink-0" />
-                Send only on {networkDetail.value}. Funds sent on any other network cannot be recovered.
-              </p>
-            )}
-
-            {method.details.length > 0 && (
-              <dl className="mt-2">
-                {method.details.map((d) => (
-                  <div key={d.label} className="grid gap-1 border-b border-line py-3.5 sm:grid-cols-[170px_1fr] sm:items-center sm:gap-6">
-                    <dt className="label-caps">{d.label}</dt>
-                    <dd className="data-id flex items-center gap-1 break-all text-[15px] font-medium text-ink">
-                      {d.value}
-                      <CopyButton value={d.value} label={`Copy ${d.label}`} />
+              {method.details.length > 0 && (
+                <dl className="grid gap-3 sm:grid-cols-2">
+                  {method.details.map((d) => (
+                    <div key={d.label} className="min-w-0 rounded-card bg-surface-2 px-4 py-3.5">
+                      <dt className="text-[12px] font-medium text-muted">{d.label}</dt>
+                      <dd className="data-id mt-1 flex items-center gap-1 break-all text-[15px] font-medium text-ink">
+                        {d.value}
+                        <CopyButton value={d.value} label={`Copy ${d.label}`} />
+                      </dd>
+                    </div>
+                  ))}
+                  <div className="min-w-0 rounded-card bg-surface-2 px-4 py-3.5">
+                    <dt className="text-[12px] font-medium text-muted">Payment note</dt>
+                    <dd className="data-id mt-1 flex items-center gap-1 text-[15px] font-medium text-ink">
+                      {orderNumber}
+                      <CopyButton value={orderNumber} label="Copy order number" />
                     </dd>
                   </div>
-                ))}
-                <div className="grid gap-1 border-b border-line py-3.5 sm:grid-cols-[170px_1fr] sm:items-center sm:gap-6">
-                  <dt className="label-caps">Payment note</dt>
-                  <dd className="data-id flex items-center gap-1 text-[15px] font-medium text-ink">
-                    {orderNumber}
-                    <CopyButton value={orderNumber} label="Copy order number" />
-                  </dd>
-                </div>
-              </dl>
-            )}
+                </dl>
+              )}
 
-            {method.qrUrl && (
-              <figure className="mt-6">
-                {/* eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL; not optimisable by next/image */}
-                <img src={method.qrUrl} alt={`QR code for ${method.name}`} className="h-[180px] w-[180px] border border-line object-contain" />
-                <figcaption className="mt-2 text-[12px] text-muted">Scan with your banking or wallet app.</figcaption>
-              </figure>
-            )}
+              {method.qrUrl && (
+                <figure>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL; not optimisable by next/image */}
+                  <img src={method.qrUrl} alt={`QR code for ${method.name}`} className="h-[180px] w-[180px] rounded-card border border-line object-contain" />
+                  <figcaption className="mt-2 text-[12px] text-muted">Scan with your banking or wallet app.</figcaption>
+                </figure>
+              )}
 
-            {method.instructions && <div className="mt-6">{method.instructions}</div>}
-          </section>
+              {method.instructions && <div>{method.instructions}</div>}
+            </div>
+          </Card>
 
           {/* 03 — upload proof */}
-          <section aria-labelledby="step-proof">
-            <h2 id="step-proof" className="flex items-baseline gap-3 text-[19px] font-semibold tracking-[-0.014em] text-ink">
-              <span className="num-tabular label-caps">03</span>Upload your proof
-            </h2>
-            <p className="mt-2 max-w-[56ch] text-[14px] leading-relaxed text-muted">
-              A clear screenshot or PDF of the payment confirmation. Our team checks it against what we received.
-            </p>
-
-            <div className="mt-6 max-w-[520px] space-y-5">
+          <Card aria-labelledby="step-proof">
+            <CardHeader
+              headingId="step-proof"
+              divided
+              title={<StepTitle n="03">Upload your proof</StepTitle>}
+              description="A clear screenshot or PDF of the payment confirmation. Our team checks it against what we received."
+            />
+            <div className="max-w-[560px] space-y-5 p-5 sm:p-6">
               <FormError state={state} />
               <FileDropzone name="proof" label="Payment proof" required error={fieldError(state, "proof")?.[0]} />
               <Field
@@ -251,9 +248,21 @@ export function PaymentFlow({
                 changes.
               </p>
             </div>
-          </section>
+          </Card>
         </form>
       )}
     </div>
+  );
+}
+
+/** "01  Choose a payment method" — the step number in lavender, then the title. */
+function StepTitle({ n, children }: { n: string; children: ReactNode }) {
+  return (
+    <>
+      <span aria-hidden className="num-tabular mr-2.5 text-lav-600">
+        {n}
+      </span>
+      {children}
+    </>
   );
 }

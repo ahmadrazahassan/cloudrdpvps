@@ -114,16 +114,16 @@ export function PreferencesForm({ ticketReplies, marketing }: { ticketReplies: b
     <form action={formAction} className="max-w-[560px]" noValidate>
       <FormError state={state} />
       {state?.ok && <FormSuccess>Preferences saved.</FormSuccess>}
-      <p className="mb-3 mt-1 text-[14px] text-muted">Email notifications</p>
-      <ul className="border-t border-line">
-        <li className="flex items-start justify-between gap-6 border-b border-line py-4">
+      <p className="mb-3 text-[14px] font-medium text-ink-2">Email notifications</p>
+      <ul className="divide-y divide-line rounded-card border border-line px-4">
+        <li className="flex items-start justify-between gap-6 py-4">
           <div>
             <p className="text-[15px] font-semibold text-ink">Order, payment, delivery and expiry emails</p>
             <p className="mt-0.5 text-[13px] text-muted">These keep your servers running, so they can&apos;t be turned off.</p>
           </div>
           <span className="label-caps mt-1 shrink-0">Always on</span>
         </li>
-        <li className="border-b border-line py-4">
+        <li className="py-4">
           <label className="flex cursor-pointer items-start justify-between gap-6">
             <span>
               <span className="block text-[15px] font-semibold text-ink">Ticket replies</span>
@@ -132,7 +132,7 @@ export function PreferencesForm({ ticketReplies, marketing }: { ticketReplies: b
             <input type="checkbox" name="ticket_replies" defaultChecked={ticketReplies} className="mt-1 h-[18px] w-[18px] shrink-0 accent-lav-600" />
           </label>
         </li>
-        <li className="border-b border-line py-4">
+        <li className="py-4">
           <label className="flex cursor-pointer items-start justify-between gap-6">
             <span>
               <span className="block text-[15px] font-semibold text-ink">News and offers</span>

@@ -15,7 +15,7 @@ export interface MenuUser {
 
 /**
  * Account block at the foot of the sidebar. A round initials avatar (the one place
- * a filled circle is allowed) and a small disclosure menu that opens upwards.
+ * a filled circle is allowed) and a small card-style menu that opens upwards.
  * Escape and outside clicks close it; focus returns to the trigger.
  */
 export function UserMenu({ user, collapsed = false }: { user: MenuUser; collapsed?: boolean }) {
@@ -42,7 +42,7 @@ export function UserMenu({ user, collapsed = false }: { user: MenuUser; collapse
     };
   }, [open]);
 
-  const item = "flex w-full items-center gap-3 px-3 py-2.5 text-left text-[14px] font-medium text-ink hover:bg-black/[0.04]";
+  const item = "flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-[14px] font-medium text-ink hover:bg-bg";
 
   return (
     <div ref={root} className="relative">
@@ -50,7 +50,7 @@ export function UserMenu({ user, collapsed = false }: { user: MenuUser; collapse
         <div
           id="user-menu"
           role="menu"
-          className="absolute bottom-full left-0 z-30 mb-2 w-[232px] border border-line-2 bg-bg py-1"
+          className="absolute bottom-full left-0 z-30 mb-2 w-[232px] rounded-card border border-black/[0.06] bg-surface p-1.5 shadow-2"
         >
           <Link href="/dashboard/settings" role="menuitem" onClick={() => setOpen(false)} className={item}>
             <Settings size={18} strokeWidth={1.5} aria-hidden className="text-muted" />
@@ -62,7 +62,8 @@ export function UserMenu({ user, collapsed = false }: { user: MenuUser; collapse
               Admin
             </Link>
           )}
-          <button type="button" role="menuitem" onClick={() => void logout({})} className={cn(item, "border-t border-line")}>
+          <div role="separator" className="mx-1 my-1.5 h-px bg-line" />
+          <button type="button" role="menuitem" onClick={() => void logout({})} className={item}>
             <LogOut size={18} strokeWidth={1.5} aria-hidden className="text-muted" />
             Sign out
           </button>
@@ -77,7 +78,7 @@ export function UserMenu({ user, collapsed = false }: { user: MenuUser; collapse
         aria-haspopup="menu"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "flex w-full items-center gap-3 rounded-btn px-2 py-2 text-left transition-colors hover:bg-black/[0.04]",
+          "flex w-full items-center gap-3 rounded-card px-2.5 py-2 text-left transition-colors hover:bg-bg",
           collapsed && "justify-center",
         )}
       >

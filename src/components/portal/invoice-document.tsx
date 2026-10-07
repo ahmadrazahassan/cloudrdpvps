@@ -55,7 +55,10 @@ export function InvoiceDocument({
   const owing = view.status === "unpaid";
 
   return (
-    <article className="invoice mx-auto w-full max-w-[820px] text-ink" aria-label={`${view.title} ${view.number}`}>
+    <article
+      className="invoice mx-auto w-full max-w-[860px] rounded-panel border border-black/[0.06] bg-surface p-6 text-ink shadow-1 sm:p-10 print:max-w-none print:rounded-none print:border-0 print:bg-transparent print:p-0 print:shadow-none"
+      aria-label={`${view.title} ${view.number}`}
+    >
       {/* Brand, document type, number, status */}
       <header className="flex flex-wrap items-start justify-between gap-x-10 gap-y-8">
         <Logo href={null} />

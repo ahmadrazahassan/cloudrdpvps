@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { Card, PagerBar } from "@/components/portal/cards";
 import { EmptyState } from "@/components/portal/empty-state";
-import { Pagination, pageParam, withParams } from "@/components/portal/list-controls";
+import { pageParam, withParams } from "@/components/portal/list-controls";
 import { NotificationItem } from "@/components/portal/notification-item";
 import { MarkAllReadButton } from "@/components/portal/notification-parts";
 import { PageHeader } from "@/components/portal/page-header";
@@ -33,12 +34,14 @@ export default async function NotificationsPage({ searchParams }: Props) {
         />
       ) : (
         <>
-          <ul className="border-t border-line">
-            {items.map((n) => (
-              <NotificationItem key={n.id} n={n} now={now} />
-            ))}
-          </ul>
-          <Pagination page={page} pageCount={pageCount} hrefFor={(p) => withParams("/dashboard/notifications", { page: p })} />
+          <Card>
+            <ul className="divide-y divide-line">
+              {items.map((n) => (
+                <NotificationItem key={n.id} n={n} now={now} />
+              ))}
+            </ul>
+            <PagerBar page={page} pageCount={pageCount} hrefFor={(p) => withParams("/dashboard/notifications", { page: p })} />
+          </Card>
         </>
       )}
     </>

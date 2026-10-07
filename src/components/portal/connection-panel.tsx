@@ -62,28 +62,30 @@ export function ConnectionPanel({
     });
   }
 
-  const row = "grid gap-1 border-b border-line py-4 sm:grid-cols-[150px_1fr] sm:items-center sm:gap-6";
+  const tile = "min-w-0 rounded-card bg-surface-2 px-4 py-3.5";
+  const term = "text-[12px] font-medium text-muted";
+  const value = "data-id mt-1 flex min-w-0 items-center gap-1 text-[16px] font-medium text-ink";
 
   return (
     <div>
-      <dl className="border-t border-line">
-        <div className={row}>
-          <dt className="label-caps">Host</dt>
-          <dd className="data-id flex items-center gap-1 text-[16px] font-medium text-ink">
+      <dl className="grid gap-3 sm:grid-cols-2">
+        <div className={tile}>
+          <dt className={term}>Host</dt>
+          <dd className={value}>
             {host}
             <CopyButton value={host} label="Copy host" />
           </dd>
         </div>
-        <div className={row}>
-          <dt className="label-caps">Port</dt>
-          <dd className="data-id flex items-center gap-1 text-[16px] font-medium text-ink">
+        <div className={tile}>
+          <dt className={term}>Port</dt>
+          <dd className={value}>
             {port}
             <CopyButton value={String(port)} label="Copy port" />
           </dd>
         </div>
-        <div className={row}>
-          <dt className="label-caps">Username</dt>
-          <dd className="data-id flex items-center gap-1 text-[16px] font-medium text-ink">
+        <div className={tile}>
+          <dt className={term}>Username</dt>
+          <dd className={value}>
             {revealed ? (
               <>
                 {revealed.username}
@@ -96,9 +98,9 @@ export function ConnectionPanel({
             )}
           </dd>
         </div>
-        <div className={row}>
-          <dt className="label-caps">Password</dt>
-          <dd className="data-id flex items-center gap-1 text-[16px] font-medium text-ink">
+        <div className={tile}>
+          <dt className={term}>Password</dt>
+          <dd className={value}>
             {revealed ? (
               <>
                 <span className="break-all">{revealed.password}</span>
@@ -142,7 +144,7 @@ export function ConnectionPanel({
         </p>
       )}
 
-      <p className="mt-5 flex items-start gap-2.5 text-[13px] leading-relaxed text-muted">
+      <p className="mt-5 flex items-start gap-2.5 border-t border-line pt-5 text-[13px] leading-relaxed text-muted">
         <KeyRound size={16} strokeWidth={1.5} aria-hidden className="mt-0.5 shrink-0" />
         <span>
           Showing login details is recorded for your security. The .rdp file for “{label}” contains the address and

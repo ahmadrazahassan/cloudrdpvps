@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { FilterLinks, param } from "@/components/portal/list-controls";
+import { Tabs } from "@/components/portal/cards";
+import { param } from "@/components/portal/list-controls";
 import { PageHeader, Section } from "@/components/portal/page-header";
 import {
   DeletionForm,
@@ -44,51 +45,56 @@ export default async function SettingsPage({ searchParams }: Props) {
   return (
     <>
       <PageHeader title="Settings" description="Your details, security and notification choices." />
-      <FilterLinks
+      <Tabs
+        className="mb-5"
         label="Settings sections"
         items={TABS.map((t) => ({ id: t.id, label: t.label }))}
         current={tab}
         hrefFor={(id) => (id === "profile" ? "/dashboard/settings" : `/dashboard/settings?tab=${id}`)}
       />
 
-      <div className="pt-10">
+      <div className="space-y-5">
         {tab === "profile" && (
-          <ProfileForm
-            countries={countryOptions()}
-            values={{
-              fullName: p.full_name,
-              phone: p.phone ?? "",
-              billingCountry: p.billing_country?.trim() ?? "",
-              company: p.company ?? "",
-              telegram: p.telegram ?? "",
-              whatsapp: p.whatsapp ?? "",
-            }}
-          />
+          <Section split title="Personal details" description="Used on your invoices, and so our team can reach you about your servers.">
+            <ProfileForm
+              countries={countryOptions()}
+              values={{
+                fullName: p.full_name,
+                phone: p.phone ?? "",
+                billingCountry: p.billing_country?.trim() ?? "",
+                company: p.company ?? "",
+                telegram: p.telegram ?? "",
+                whatsapp: p.whatsapp ?? "",
+              }}
+            />
+          </Section>
         )}
 
         {tab === "security" && (
-          <div>
-            <Section title="Password" description="Changing it signs your other devices out.">
+          <>
+            <Section split title="Password" description="Changing it signs your other devices out.">
               <PasswordForm />
             </Section>
-            <Section title="Two-step verification" description="Protect your account with a code from an authenticator app.">
+            <Section split title="Two-step verification" description="Protect your account with a code from an authenticator app.">
               <TwoStep enabled={mfa.enabled} canDisable={!isStaff(user)} />
             </Section>
-            <Section title="Email address" description="We'll send a confirmation link to the new address.">
+            <Section split title="Email address" description="We'll send a confirmation link to the new address.">
               <EmailForm current={user.email} />
             </Section>
-            <Section title="Sessions" description="If you've used a shared computer, or think someone else has access.">
+            <Section split title="Sessions" description="If you've used a shared computer, or think someone else has access.">
               <SignOutEverywhere />
             </Section>
-          </div>
+          </>
         )}
 
         {tab === "preferences" && (
-          <PreferencesForm ticketReplies={prefs.ticket_replies !== false} marketing={prefs.marketing === true} />
+          <Section split title="Notifications" description="Choose which emails you get. Notifications in the dashboard always appear.">
+            <PreferencesForm ticketReplies={prefs.ticket_replies !== false} marketing={prefs.marketing === true} />
+          </Section>
         )}
 
         {tab === "account" && (
-          <Section title="Delete my account" description="This can't be undone once it's done, so a person checks first.">
+          <Section split title="Delete my account" description="This can't be undone once it's done, so a person checks first.">
             <DeletionForm blocked={hasActiveServers} />
           </Section>
         )}

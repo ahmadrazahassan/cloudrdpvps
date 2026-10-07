@@ -33,7 +33,7 @@ export default async function InvoicePage({ params }: Props) {
 
   return (
     <>
-      <div className="mx-auto mb-8 flex max-w-[820px] items-center justify-between gap-4 print:hidden">
+      <div className="mx-auto mb-5 flex max-w-[860px] items-center justify-between gap-4 print:hidden">
         <Link href="/dashboard/billing" className="text-link text-[14px]">
           ← Back to billing
         </Link>

@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { isActive, portalNav } from "./nav-items";
 
 /**
- * The portal's primary navigation. Bare icons, no boxes: the active row gets a
- * 2px lavender bar on its left edge and a faint row highlight — nothing around the icon.
+ * The portal's primary navigation. Bare icons, never inside a chip: the active row is tinted lavender
+ * as a whole (icon and label together) and its icon turns lavender — nothing is drawn behind the icon itself.
  */
 export function NavList({
   unread = 0,
@@ -22,7 +22,7 @@ export function NavList({
 
   return (
     <nav aria-label="Dashboard">
-      <ul className="space-y-0.5">
+      <ul className="space-y-1">
         {portalNav.map((item) => {
           const active = isActive(pathname, item);
           const count = item.badge === "unread" ? unread : 0;
@@ -34,25 +34,25 @@ export function NavList({
                 aria-current={active ? "page" : undefined}
                 title={collapsed ? item.label : undefined}
                 className={cn(
-                  "relative flex h-11 items-center gap-3 rounded-btn px-3 text-[15px] transition-colors",
+                  "relative flex h-11 items-center gap-3 rounded-card px-3.5 text-[15px] transition-colors",
                   collapsed && "justify-center px-0",
                   active
-                    ? "bg-black/[0.04] font-semibold text-ink before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-lav-500"
-                    : "font-medium text-ink-2 hover:bg-black/[0.03] hover:text-ink",
+                    ? "bg-lav-50 font-semibold text-lav-800"
+                    : "font-medium text-ink-2 hover:bg-bg hover:text-ink",
                 )}
               >
                 <item.icon
                   size={20}
                   strokeWidth={1.5}
                   aria-hidden
-                  className={cn("shrink-0", active ? "text-lav-600" : "text-muted")}
+                  className={cn("shrink-0", active ? "text-lav-600" : "text-ink-2")}
                 />
                 <span className={cn(collapsed && "sr-only")}>{item.label}</span>
                 {count > 0 && (
                   <span
                     className={cn(
-                      "num-tabular ml-auto text-[12px] font-semibold text-lav-700",
-                      collapsed && "absolute right-2 top-1.5 ml-0 text-[10px]",
+                      "num-tabular ml-auto rounded-badge bg-lav-600 px-1.5 py-1 text-[11px] font-semibold leading-none text-white",
+                      collapsed && "absolute right-1.5 top-1 ml-0 px-1 text-[10px]",
                     )}
                   >
                     {count > 99 ? "99+" : count}

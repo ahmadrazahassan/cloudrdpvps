@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WindowsLogo } from "@/components/brand/windows-logo";
+import { Card } from "@/components/portal/cards";
 import { Countdown } from "@/components/portal/countdown";
 import { EmptyState } from "@/components/portal/empty-state";
 import { PageHeader } from "@/components/portal/page-header";
@@ -63,30 +64,30 @@ export default async function PayPage({ params, searchParams }: Props) {
   const location = catalog.locations.find((l) => l.id === order.location_id);
 
   const summary = (
-    <aside aria-label="Order summary" className="border-t border-line pt-8 lg:sticky lg:top-24 lg:self-start lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-      <p className="label-caps">Order {order.order_number}</p>
-      <h2 className="mt-4 text-[22px] font-semibold tracking-[-0.016em] text-ink">{order.plan_name}</h2>
+    <Card as="aside" padded aria-label="Order summary" className="lg:sticky lg:top-24 lg:self-start">
+      <p className="text-[13px] font-medium text-muted">Order {order.order_number}</p>
+      <h2 className="mt-2 font-display text-[22px] font-semibold tracking-[-0.02em] text-ink">{order.plan_name}</h2>
       <p className="mt-2 flex items-center gap-2 text-[14px] text-ink-2">
         {location && <CountryFlag iso2={location.iso2} />}
         {order.location_name} · {order.term_days} days
       </p>
-      <div className="mt-5 border-t border-line pt-5">
-        <p className="label-caps">Total due</p>
+      <div className="mt-5 rounded-card bg-lav-50 px-5 py-4">
+        <p className="text-[13px] font-medium text-lav-800">Total due</p>
         <p className="num-tabular mt-2 font-display text-[34px] font-medium leading-none tracking-[-0.03em] text-ink">
           {formatUsd(order.total_cents, { cents: true })}
         </p>
-        <p className="mt-1 text-[12px] text-muted">US dollars</p>
+        <p className="mt-1.5 text-[12px] text-ink-2">US dollars</p>
       </div>
       <p className="mt-4 flex items-center gap-2 text-[13px] text-muted">
         <WindowsLogo size={14} />
         Windows Server included
       </p>
-      <p className="mt-6 text-[13px]">
+      <p className="mt-5 border-t border-line pt-5 text-[13px]">
         <Link href={`/dashboard/orders/${order.id}`} className="text-link">
           View order details
         </Link>
       </p>
-    </aside>
+    </Card>
   );
 
   // ----- Not payable: say what happened and where to go next --------------------------------------------------
@@ -170,8 +171,10 @@ export default async function PayPage({ params, searchParams }: Props) {
           </>
         }
       />
-      <OrderSteps label="Checkout steps" steps={checkoutSteps("pay", { signedIn: true })} className="mx-auto mb-12 max-w-[760px] border-b border-line pb-10" />
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16">
+      <Card padded className="mb-5 py-7">
+        <OrderSteps label="Checkout steps" steps={checkoutSteps("pay", { signedIn: true })} surface="card" className="mx-auto max-w-[760px]" />
+      </Card>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <PaymentFlow
           orderId={order.id}
           orderNumber={order.order_number}

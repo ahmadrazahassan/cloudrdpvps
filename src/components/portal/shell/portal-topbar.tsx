@@ -50,29 +50,29 @@ function Crumbs() {
   );
 }
 
-/** 64px top bar: menu button (phones), breadcrumbs, and the notification bell. */
+/** 72px top bar on the page itself (no band, no rule): menu button (phones), breadcrumbs, search and the bell. */
 export function PortalTopbar({ user, unread }: { user: MenuUser; unread: number }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-line bg-bg/85 px-4 backdrop-blur-md sm:px-8 print:hidden">
+    <header className="sticky top-0 z-40 flex h-[72px] items-center justify-between gap-4 bg-bg/85 px-4 backdrop-blur-md sm:px-6 lg:px-8 print:hidden">
       <div className="flex min-w-0 items-center gap-3">
         <Dialog.Root open={open} onOpenChange={setOpen}>
           <Dialog.Trigger
             aria-label="Open menu"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-btn text-ink hover:bg-black/[0.05] lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-card text-ink hover:bg-black/[0.05] lg:hidden"
           >
             <Menu size={22} strokeWidth={1.5} aria-hidden />
           </Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 z-[60] bg-ink/30 data-[state=open]:animate-[fade-in_0.2s_ease-out]" />
-            <Dialog.Content className="fixed inset-y-0 left-0 z-[70] flex w-[86%] max-w-[300px] flex-col border-r border-line bg-bg p-5 data-[state=open]:animate-[sheet-in_0.25s_ease-out]">
+            <Dialog.Content className="fixed inset-y-0 left-0 z-[70] flex w-[86%] max-w-[300px] flex-col rounded-r-panel bg-surface p-5 shadow-2 data-[state=open]:animate-[sheet-in_0.25s_ease-out]">
               <Dialog.Title className="sr-only">Menu</Dialog.Title>
               <Dialog.Description className="sr-only">Dashboard navigation</Dialog.Description>
               <div className="flex items-center justify-between">
                 <Logo href="/dashboard" />
                 <Dialog.Close
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-btn hover:bg-black/[0.05]"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-card hover:bg-black/[0.05]"
                   aria-label="Close menu"
                 >
                   <X size={22} strokeWidth={1.5} aria-hidden />
@@ -93,23 +93,26 @@ export function PortalTopbar({ user, unread }: { user: MenuUser; unread: number 
         <Crumbs />
       </div>
 
-      <div className="ml-auto hidden w-full max-w-[300px] md:block">
-        <PaletteButton placeholder="Search or jump to…" />
+      <div className="ml-auto hidden w-full max-w-[340px] md:block">
+        <PaletteButton
+          placeholder="Search or jump to…"
+          className="h-11 rounded-card border-black/[0.06] bg-surface shadow-1 hover:border-line-2"
+        />
       </div>
       <button
         type="button"
         onClick={openPalette}
         aria-label="Search"
-        className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-btn text-ink hover:bg-black/[0.05] md:hidden"
+        className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-card text-ink hover:bg-black/[0.05] md:hidden"
       >
         <Search size={20} strokeWidth={1.5} aria-hidden />
       </button>
       <Link
         href="/dashboard/notifications"
-        className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-btn text-ink hover:bg-black/[0.05]"
+        className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-card text-ink hover:bg-black/[0.05]"
       >
         <Bell size={20} strokeWidth={1.5} aria-hidden />
-        {unread > 0 && <span aria-hidden className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-lav-600" />}
+        {unread > 0 && <span aria-hidden className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full border-2 border-bg bg-lav-600" />}
         <span className="sr-only">Notifications{unread > 0 ? `, ${unread} unread` : ""}</span>
       </Link>
     </header>

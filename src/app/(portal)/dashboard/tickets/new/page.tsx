@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Card } from "@/components/portal/cards";
 import { NewTicketForm } from "@/components/portal/new-ticket-form";
 import { PageHeader } from "@/components/portal/page-header";
 import { param } from "@/components/portal/list-controls";
@@ -21,7 +22,9 @@ export default async function NewTicketPage({ searchParams }: Props) {
         title="New ticket"
         description="Tell us what's happening. Restarts and reinstalls are done by our team — just ask."
       />
-      <NewTicketForm services={services} defaultServiceId={defaultServiceId} defaultCategory={param(sp.category)} />
+      <Card padded className="max-w-[760px]">
+        <NewTicketForm services={services} defaultServiceId={defaultServiceId} defaultCategory={param(sp.category)} />
+      </Card>
     </>
   );
 }

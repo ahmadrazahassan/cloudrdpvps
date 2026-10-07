@@ -57,17 +57,19 @@ export default async function PortalLayout({ children }: { children: React.React
       <div className="min-w-0 flex-1">
         <PortalTopbar user={menuUser} unread={unread} />
         {suspended && (
-          <div role="alert" className="border-b border-warn/40 px-4 py-3 text-[14px] text-warn sm:px-8">
-            Your account is suspended
-            {user.profile.suspended_reason ? `: ${user.profile.suspended_reason}` : "."} You can still read your
-            records and open support tickets, but new orders are paused.{" "}
-            <Link href="/dashboard/tickets/new" className="font-semibold underline underline-offset-4">
-              Contact support
-            </Link>
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div role="alert" className="mx-auto max-w-[1280px] rounded-card bg-warn-bg px-5 py-3.5 text-[14px] leading-relaxed text-warn">
+              Your account is suspended
+              {user.profile.suspended_reason ? `: ${user.profile.suspended_reason}` : "."} You can still read your
+              records and open support tickets, but new orders are paused.{" "}
+              <Link href="/dashboard/tickets/new" className="font-semibold underline underline-offset-4">
+                Contact support
+              </Link>
+            </div>
           </div>
         )}
-        <main id="main" className="px-4 pb-24 pt-8 sm:px-8 md:pt-10">
-          <div className="mx-auto max-w-[1200px]">{children}</div>
+        <main id="main" className="px-4 pb-20 pt-3 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-[1280px]">{children}</div>
         </main>
       </div>
     </div>

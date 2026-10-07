@@ -2,11 +2,11 @@ import { FileText } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Card } from "@/components/portal/cards";
 import { LocalTime } from "@/components/portal/local-time";
 import { PageHeader } from "@/components/portal/page-header";
 import { StatusBadge } from "@/components/portal/status-badge";
 import { TicketLive, TicketReplyForm, TicketStatusButton } from "@/components/portal/ticket-parts";
-import { Tag } from "@/components/shared/primitives";
 import { now as clock } from "@/lib/clock";
 import { getTicket, signedUrl, type TicketMessage } from "@/lib/portal/queries";
 import { cn } from "@/lib/utils";
@@ -78,27 +78,27 @@ export default async function TicketPage({ params }: Props) {
         actions={!closedForGood ? <TicketStatusButton ticketId={ticket.id} current={ticket.status} /> : undefined}
       />
 
-      <ol className="space-y-5" aria-label="Conversation">
+      <ol className="space-y-4" aria-label="Conversation">
         {messages.map((m) => {
           const staff = m.author_role !== "customer";
           return (
             <li key={m.id} className={cn("flex", staff ? "justify-start" : "justify-end")}>
               <div
                 className={cn(
-                  "w-full max-w-[680px] rounded-btn border px-5 py-4",
-                  staff ? "border-line-2" : "border-lav-300",
+                  "w-full max-w-[720px] rounded-panel border px-5 py-4 sm:px-6 sm:py-5",
+                  staff ? "border-black/[0.06] bg-surface shadow-1" : "border-lav-200 bg-lav-50",
                 )}
               >
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="text-[14px] font-semibold text-ink">{staff ? "Support" : "You"}</span>
-                  {staff && <Tag tone="lavender">Support</Tag>}
+                  {staff && <span className="rounded-badge bg-lav-100 px-2 py-1 text-[11px] font-medium leading-none text-lav-800">Team</span>}
                   <span className="num-tabular text-[12px] text-muted">
                     <LocalTime value={m.created_at} />
                   </span>
                 </div>
                 <p className="mt-2.5 whitespace-pre-wrap break-words text-[15px] leading-[1.7] text-ink-2">{m.body}</p>
                 {attachmentsOf(m).length > 0 && (
-                  <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-line pt-3">
+                  <ul className={cn("mt-3 flex flex-wrap gap-x-5 gap-y-1.5 border-t pt-3", staff ? "border-line" : "border-lav-200")}>
                     {attachmentsOf(m).map((a) => {
                       const href = links.get(a.path);
                       return (
@@ -122,7 +122,7 @@ export default async function TicketPage({ params }: Props) {
         })}
       </ol>
 
-      <div className="mt-12 border-t border-line pt-10">
+      <Card padded className="mt-6 max-w-[720px]">
         {closedForGood ? (
           <p className="text-[15px] text-ink-2">
             This ticket was closed a while ago.{" "}
@@ -132,12 +132,12 @@ export default async function TicketPage({ params }: Props) {
             if you still need help.
           </p>
         ) : (
-          <div className="max-w-[680px]">
-            <h2 className="mb-5 text-[19px] font-semibold tracking-[-0.014em] text-ink">Reply</h2>
+          <>
+            <h2 className="mb-5 font-display text-[17px] font-semibold tracking-[-0.016em] text-ink">Reply</h2>
             <TicketReplyForm ticketId={ticket.id} />
-          </div>
+          </>
         )}
-      </div>
+      </Card>
     </>
   );
 }

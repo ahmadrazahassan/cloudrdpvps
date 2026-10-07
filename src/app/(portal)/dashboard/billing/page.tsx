@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Card, Row, RowList, TableHead, Tabs } from "@/components/portal/cards";
 import { EmptyState } from "@/components/portal/empty-state";
-import { FilterLinks, param } from "@/components/portal/list-controls";
+import { param } from "@/components/portal/list-controls";
 import { LocalTime } from "@/components/portal/local-time";
 import { PageHeader } from "@/components/portal/page-header";
 import { StatusBadge } from "@/components/portal/status-badge";
@@ -21,7 +22,8 @@ export default async function BillingPage({ searchParams }: Props) {
     <>
       <PageHeader title="Billing" description="Invoices for paid orders, and every payment you've submitted." />
 
-      <FilterLinks
+      <Tabs
+        className="mb-5"
         label="Billing sections"
         current={tab}
         items={[
@@ -44,22 +46,24 @@ export default async function BillingPage({ searchParams }: Props) {
             }
           />
         ) : (
-          <>
-            <div aria-hidden className="label-caps hidden grid-cols-[1.2fr_1fr_1fr_0.8fr_auto] gap-6 border-b border-line py-3 md:grid">
+          <Card>
+            <TableHead className="md:grid-cols-[1.2fr_1fr_1fr_0.8fr_auto]">
               <span>Invoice</span>
               <span>Date</span>
               <span>Order</span>
               <span>Amount</span>
               <span className="w-[120px]" />
-            </div>
-            <ul>
+            </TableHead>
+            <RowList className="border-t border-line md:border-t-0">
               {invoices.map((inv) => (
-                <li key={inv.id} className="grid gap-x-6 gap-y-2 border-b border-line py-5 md:grid-cols-[1.2fr_1fr_1fr_0.8fr_auto] md:items-center">
+                <Row key={inv.id} className="md:grid-cols-[1.2fr_1fr_1fr_0.8fr_auto]">
                   <div className="flex items-center gap-3">
                     <Link href={`/dashboard/billing/invoices/${inv.id}`} className="data-id text-[15px] font-semibold text-ink hover:text-lav-700">
                       {inv.invoice_number}
                     </Link>
-                    {inv.status === "void" && <span className="label-caps text-bad">Void</span>}
+                    {inv.status === "void" && (
+                      <span className="rounded-badge bg-bad-bg px-2.5 py-1.5 text-[12px] font-medium leading-none text-bad-ink">Void</span>
+                    )}
                   </div>
                   <p className="text-[14px] text-ink-2">
                     <LocalTime value={inv.issued_at} dateOnly />
@@ -71,25 +75,25 @@ export default async function BillingPage({ searchParams }: Props) {
                       View / Print
                     </ButtonLink>
                   </div>
-                </li>
+                </Row>
               ))}
-            </ul>
-          </>
+            </RowList>
+          </Card>
         )
       ) : payments.length === 0 ? (
         <EmptyState image="empty-orders" title="No payments yet" body="Payments you submit for your orders are listed here." />
       ) : (
-        <>
-          <div aria-hidden className="label-caps hidden grid-cols-[1fr_1fr_1.3fr_0.8fr_1fr] gap-6 border-b border-line py-3 md:grid">
+        <Card>
+          <TableHead className="md:grid-cols-[1fr_1fr_1.3fr_0.8fr_1fr]">
             <span>Date</span>
             <span>Order</span>
             <span>Method</span>
             <span>Amount</span>
             <span>Status</span>
-          </div>
-          <ul>
+          </TableHead>
+          <RowList className="border-t border-line md:border-t-0">
             {payments.map((p) => (
-              <li key={p.id} className="grid gap-x-6 gap-y-2 border-b border-line py-5 md:grid-cols-[1fr_1fr_1.3fr_0.8fr_1fr] md:items-center">
+              <Row key={p.id} className="md:grid-cols-[1fr_1fr_1.3fr_0.8fr_1fr]">
                 <p className="text-[14px] text-ink-2">
                   <LocalTime value={p.created_at} dateOnly />
                 </p>
@@ -104,10 +108,10 @@ export default async function BillingPage({ searchParams }: Props) {
                 <div>
                   <StatusBadge kind="payment" status={p.status} />
                 </div>
-              </li>
+              </Row>
             ))}
-          </ul>
-        </>
+          </RowList>
+        </Card>
       )}
     </>
   );
