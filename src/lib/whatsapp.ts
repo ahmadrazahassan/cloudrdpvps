@@ -56,17 +56,22 @@ export function parseWhatsAppTarget(href: string | null | undefined): WhatsAppTa
   return null;
 }
 
+/** A WhatsApp address typed without its scheme ("wa.me/9230…") or with plain http — only WhatsApp's own hosts match. */
+const LOOSE_LINK = /^(?:https?:\/\/)?((?:wa\.me|(?:api\.|chat\.|www\.)?whatsapp\.com)\/\S*)$/i;
+
 /**
- * What the owner typed in the settings field: a number ("+92 300 1234567", "0092 300 1234567") or a WhatsApp link.
- * Always saved as the canonical link, so every place that shows it (footer, contact page, chat) behaves the same.
+ * What the owner typed in the settings field: a number ("+92 309 3871661", "0092 309 3871661") or a WhatsApp link
+ * (with or without "https://"). Always saved as the canonical link, so every place that shows it (footer, contact
+ * page, chat) behaves the same. A leading "*" or full-width "＋" is read as the "+" it was meant to be.
  */
 export function normalizeWhatsAppInput(raw: string): { ok: true; value: string } | { ok: false } {
-  const input = raw.trim();
+  const input = raw.trim().replace(/^[*＋]\s*(?=\d)/, "+");
   if (/^\+?[\d\s().-]+$/.test(input)) {
     const digits = input.replace(/\D/g, "").replace(/^00/, "");
     return PHONE.test(digits) ? { ok: true, value: withPhone(digits).url } : { ok: false };
   }
-  const target = parseWhatsAppTarget(input);
+  const loose = LOOSE_LINK.exec(input);
+  const target = parseWhatsAppTarget(loose ? `https://${loose[1]}` : input);
   return target ? { ok: true, value: target.url } : { ok: false };
 }
 

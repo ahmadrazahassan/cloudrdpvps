@@ -11,7 +11,7 @@ export async function loadEmailContext(db: SupabaseClient<Database>): Promise<Em
   return {
     siteName: typeof map.get("site_name") === "string" ? (map.get("site_name") as string) : "Cloud RDP VPS",
     siteUrl: publicEnv.siteUrl,
-    supportEmail: typeof map.get("support_email") === "string" ? (map.get("support_email") as string) : null,
+    supportEmail: typeof map.get("support_email") === "string" ? ((map.get("support_email") as string).trim() || null) : null,
     address: addressLines(map.get("company_block")),
   };
 }

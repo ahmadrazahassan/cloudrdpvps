@@ -131,7 +131,11 @@ export function SettingsForm({
     setMessage(null);
     start(async () => {
       const r = await saveSettings({ group, values: v });
-      if (r.ok) setMessage({ ok: true, text: "Saved." });
+      if (r.ok) {
+        // Show what was stored (a typed number is saved as its wa.me link) so the field never disagrees with the site.
+        setV((cur) => ({ ...cur, ...Object.fromEntries(Object.entries(r.data.stored).filter(([k]) => typeof cur[k] === "string")) }));
+        setMessage({ ok: true, text: "Saved." });
+      }
       else {
         setErrors(r.fieldErrors ?? {});
         if (!r.fieldErrors || Object.keys(r.fieldErrors).length === 0) setMessage({ ok: false, text: r.message });

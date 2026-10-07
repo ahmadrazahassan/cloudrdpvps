@@ -57,7 +57,16 @@ describe("normalizeWhatsAppInput", () => {
     expect(normalizeWhatsAppInput(" https://api.whatsapp.com/send?phone=923001234567&text=hi ")).toEqual({ ok: true, value: "https://wa.me/923001234567" });
     expect(normalizeWhatsAppInput("https://wa.me/message/ABC123")).toEqual({ ok: true, value: "https://wa.me/message/ABC123" });
     expect(normalizeWhatsAppInput("https://t.me/yourname").ok).toBe(false);
-    expect(normalizeWhatsAppInput("wa.me/923001234567").ok).toBe(false); // needs the https:// scheme
+    expect(normalizeWhatsAppInput("https://evil.example/923001234567").ok).toBe(false);
+    expect(normalizeWhatsAppInput("https://wa.me.evil.example/923001234567").ok).toBe(false);
+    expect(normalizeWhatsAppInput("http://evil.example/wa.me/923001234567").ok).toBe(false);
+  });
+
+  it("is forgiving about how a number or link was typed", () => {
+    for (const typed of ["* 92 309 3871661", "＋92 309 3871661", "+92 309 3871661", "92 309 3871661", "+92-309-3871661", "wa.me/923093871661", "http://wa.me/923093871661", "www.whatsapp.com/send?phone=923093871661", "https://wa.me/923093871661"]) {
+      expect(normalizeWhatsAppInput(typed), typed).toEqual({ ok: true, value: "https://wa.me/923093871661" });
+    }
+    expect(normalizeWhatsAppInput("wa.me/message/ABC123")).toEqual({ ok: true, value: "https://wa.me/message/ABC123" });
   });
 });
 
