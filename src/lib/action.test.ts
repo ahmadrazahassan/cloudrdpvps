@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
+const drain = vi.hoisted(() => ({ soon: vi.fn() }));
+
 const state = vi.hoisted(() => ({
   user: null as null | { id: string; profile: { role: "customer" | "support" | "admin" } },
   captchaOk: true,
@@ -31,6 +33,7 @@ vi.mock("@/lib/auth/mfa", () => ({
   needsSecondFactor: async () => state.needs2fa,
 }));
 vi.mock("@/lib/request", () => ({ getClientIp: async () => "198.51.100.7" }));
+vi.mock("@/lib/email/queue", () => ({ drainSoon: drain.soon }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ fake: "supabase" }) }));
 vi.mock("@/lib/turnstile", () => ({
   TURNSTILE_FIELD: "cf-turnstile-response",
@@ -45,6 +48,7 @@ const schema = z.object({ label: z.string().trim().min(2, "Too short") });
 const customer = { id: "u1", profile: { role: "customer" as const } };
 
 beforeEach(() => {
+  drain.soon.mockClear();
   state.user = customer;
   state.captchaOk = true;
   state.configured = true;
@@ -183,6 +187,29 @@ describe("action()", () => {
     expect(handler).not.toHaveBeenCalled();
     state.captchaOk = true;
     expect((await run({ label: "abc", "cf-turnstile-response": "tok" })).ok).toBe(true);
+  });
+});
+
+describe("notifies", () => {
+  it("sends queued emails once the input is valid, even if the handler then fails", async () => {
+    const run = action({
+      name: "n1",
+      schema,
+      notifies: true,
+      handler: async () => {
+        throw new AppError("FORBIDDEN");
+      },
+    });
+    expect(await run({ label: "x" })).toMatchObject({ ok: false, code: "VALIDATION" });
+    expect(drain.soon).not.toHaveBeenCalled(); // nothing was done, so nothing to send
+    expect(await run({ label: "abc" })).toMatchObject({ ok: false, code: "FORBIDDEN" });
+    expect(drain.soon).toHaveBeenCalledTimes(1); // registered before the handler, so a redirect() in it is covered too
+  });
+
+  it("does nothing for actions that don't cause an email", async () => {
+    const run = action({ name: "n2", schema, handler: async () => "ok" });
+    await run({ label: "abc" });
+    expect(drain.soon).not.toHaveBeenCalled();
   });
 });
 

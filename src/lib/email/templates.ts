@@ -39,7 +39,7 @@ interface Draft {
   action?: { label: string; path: string };
 }
 
-function draft(template: string, d: Record<string, unknown>): Draft | null {
+function draft(template: string, d: Record<string, unknown>, ctx: EmailContext): Draft | null {
   const order = str(d.order_number);
   const label = str(d.label, "your server");
   switch (template) {
@@ -105,6 +105,28 @@ function draft(template: string, d: Record<string, unknown>): Draft | null {
         lines: [`Support replied to your ticket “${str(d.subject)}”.`],
         action: { label: "Read the reply", path: `/dashboard/tickets/${str(d.ticket_id)}` },
       };
+    // ---- account ----
+    case "welcome": {
+      const name = str(d.name).trim().split(/\s+/)[0];
+      return {
+        subject: `Welcome to ${ctx.siteName}`,
+        lines: [
+          `${name ? `Hi ${name}, your` : "Your"} account is ready.`,
+          "Here's how it works: choose a Windows RDP or VPS plan, send your payment, and upload the proof. Our team checks it by hand and delivers your server — you'll get an email the moment it's ready.",
+          "Your server's login details are never sent by email. You'll find them in your dashboard once it's delivered.",
+        ],
+        action: { label: "Choose your plan", path: "/order/new" },
+      };
+    }
+    case "password_changed":
+      return {
+        subject: "Your password was changed",
+        lines: [
+          "The password for your account was just changed, and every other device was signed out.",
+          "If this was you, there's nothing more to do. If it wasn't, reset your password straight away and contact us.",
+        ],
+        action: { label: "Reset your password", path: "/forgot-password" },
+      };
     // ---- staff alerts (sent to admins / support; never include a customer's message text) ----
     case "staff_payment_submitted":
       return {
@@ -133,7 +155,7 @@ function draft(template: string, d: Record<string, unknown>): Draft | null {
 
 /** Returns null for a template name we don't know (the caller marks that row failed instead of sending nonsense). */
 export function renderEmail(template: string, data: unknown, ctx: EmailContext): RenderedEmail | null {
-  const d = draft(template, data && typeof data === "object" ? (data as Record<string, unknown>) : {});
+  const d = draft(template, data && typeof data === "object" ? (data as Record<string, unknown>) : {}, ctx);
   if (!d) return null;
 
   const url = d.action ? `${ctx.siteUrl}${d.action.path}` : null;
@@ -142,9 +164,11 @@ export function renderEmail(template: string, data: unknown, ctx: EmailContext):
   const text = [...d.lines, url ? `${d.action!.label}: ${url}` : "", footer, ctx.siteName].filter(Boolean).join("\n\n");
 
   const para = (s: string) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f46">${escapeHtml(s)}</p>`;
-  const html = `<!doctype html><html><body style="margin:0;padding:24px;background:#f1f1f1;font-family:Inter,Segoe UI,Arial,sans-serif;color:#121214"><div style="max-width:520px;margin:0 auto"><p style="margin:0 0 24px"><img src="${escapeHtml(ctx.siteUrl)}/brand/logo.png" width="220" height="40" alt="${escapeHtml(ctx.siteName)}" style="display:block;border:0;max-width:100%;height:auto"></p>${d.lines.map(para).join("")}${
-    url ? `<p style="margin:24px 0"><a href="${escapeHtml(url)}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#7c4fcf;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">${escapeHtml(d.action!.label)}</a></p>` : ""
-  }<p style="margin:32px 0 0;padding-top:16px;border-top:1px solid #e2e2e6;font-size:13px;color:#666670">${escapeHtml(footer)}</p></div></body></html>`;
+  const button = url
+    ? `<p style="margin:24px 0 0"><a href="${escapeHtml(url)}" style="display:inline-block;padding:12px 22px;border-radius:10px;background:#7c4fcf;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">${escapeHtml(d.action!.label)}</a></p>`
+    : "";
+  // Same look as the Supabase Auth emails in supabase/templates: logo on the grey page, the message on a white card.
+  const html = `<!doctype html><html lang="en"><body style="margin:0;padding:24px;background:#f1f1f1;font-family:Inter,'Segoe UI',Arial,sans-serif;color:#121214"><div style="max-width:520px;margin:0 auto"><p style="margin:0 0 24px"><img src="${escapeHtml(ctx.siteUrl)}/brand/logo-black.png" width="220" height="40" alt="${escapeHtml(ctx.siteName)}" style="display:block;border:0;max-width:100%;height:auto"></p><div style="padding:28px;background:#ffffff;border-radius:16px">${d.lines.map(para).join("")}${button}</div><p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:#666670">${escapeHtml(footer)}</p></div></body></html>`;
 
   return { subject: d.subject, text, html };
 }

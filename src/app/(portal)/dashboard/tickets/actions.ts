@@ -13,6 +13,7 @@ const MAX_ATTACHMENTS = 3;
 
 export const createTicket = formAction({
   name: "create-ticket",
+  notifies: true,
   auth: "user",
   rateLimit: { limit: 10, window: "1 h" },
   schema: z.object({
@@ -38,6 +39,7 @@ export const createTicket = formAction({
 /** Replies can carry up to three files. Each is content-checked, then stored under the ticket's own folder. */
 export const replyToTicket = formAction({
   name: "reply-to-ticket",
+  notifies: true,
   auth: "user",
   rateLimit: { limit: 30, window: "1 h" },
   schema: z.object({

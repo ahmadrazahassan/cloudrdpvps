@@ -6,6 +6,7 @@ import { z } from "zod";
 import { action, formAction } from "@/lib/action";
 import { fromAuthError } from "@/lib/auth/errors";
 import { COUNTRY_CODES } from "@/content/countries";
+import { drainSoon, enqueueEmail } from "@/lib/email/queue";
 import { publicEnv } from "@/lib/env";
 import { AppError, fromDbError } from "@/lib/errors";
 import { checkbox, email, fullName, newPassword, optionalText } from "@/lib/validation";
@@ -68,6 +69,8 @@ export const changePassword = formAction({
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw fromAuthError(error);
     await supabase.auth.signOut({ scope: "others" });
+    // Tell them, so a change they didn't make doesn't go unnoticed.
+    if (await enqueueEmail({ userId: user!.id, to: user!.email, template: "password_changed" })) drainSoon();
     return { changed: true as const };
   },
 });

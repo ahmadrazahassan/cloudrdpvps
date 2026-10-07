@@ -105,6 +105,7 @@ const deliverSchema = z
  */
 export const deliverServer = formAction({
   name: "admin-deliver-server",
+  notifies: true,
   auth: "admin",
   rateLimit: { limit: 120, window: "1 h" },
   schema: deliverSchema,

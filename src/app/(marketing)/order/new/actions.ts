@@ -33,6 +33,7 @@ export const previewCoupon = action({
  */
 export const placeOrder = formAction({
   name: "place-order",
+  notifies: true,
   auth: "user",
   rateLimit: { limit: 10, window: "1 h" },
   schema: z.object({

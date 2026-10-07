@@ -11,7 +11,7 @@ Storefront for selling **Windows RDP** and **Windows VPS** (30-day plans, USD pr
 | 3. Auth: sign in / register / forgot & reset password / email confirmation / **two-step verification (TOTP) for everyone** | **Done** (flat screens, server actions, rate limits, optional Turnstile; an account with an authenticator is asked for a code after the password, on every screen *and* every action) |
 | 4. Checkout and customer dashboard (`prompts/02`): `/order/new` (with live coupon preview), overview, servers (credential reveal, `.rdp` download), orders, manual payment + proof upload, billing & invoices, tickets, notifications, settings; **⌘K command palette** | **Built** — verified with unit tests, rendered-page checks and browser tests; the signed-in flows against the live database haven't been exercised (see "Not yet exercised") |
 | 5. Admin console (`prompts/03`) at `/admin` | **Built** — every module in the spec: overview, payment review, orders + deliver-server, services, customers, tickets, inbox, invoices, plans, pricing & stock grid, locations, payment methods, coupons, FAQs, announcement, team, audit log, settings, inventory (+ CSV import), reports (+ CSV export). Role split (support vs admin), staff MFA, audit trail on every change |
-| 6. Transactional email (Resend) | **Built** — the database queues every notice; `/api/cron/maintenance` sends them (retries, never any password). Needs `RESEND_API_KEY` + `EMAIL_FROM` and a scheduler hitting that endpoint every 5–10 minutes. Staff are emailed about new payment proofs, tickets and contact messages |
+| 6. Transactional email (Resend) | **Built** — the database queues every notice and the app sends it a moment after the action that caused it (`/api/cron/maintenance` retries anything that failed; never any password). Sign-up confirmation and password-reset emails go out through Supabase SMTP → Resend using the branded files in `supabase/templates`. A welcome email follows a confirmed account, and a notice follows every password change. Needs `RESEND_API_KEY` + `EMAIL_FROM` — see **Email (Resend)** below the status table. Staff are emailed about new payment proofs, tickets and contact messages |
 | 7. Public site reads what admins edit | **Done** — support contacts, delivery ETA, announcement banner, maintenance banner and the FAQ come from the database (with built-in fallbacks), refreshed the moment an admin saves |
 
 Every link in the header and footer now goes to a real page.
@@ -37,10 +37,50 @@ Without Supabase keys the homepage still renders from the bundled seed and the a
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | everything backed by the database | the publishable key is fine; both are public |
 | `SUPABASE_SERVICE_ROLE_KEY` | the **contact form** (it writes `contact_messages`, which has no public insert policy), `npm run make-admin`, the cron route, the email sender, delivering a server **from stock**, inviting staff by email, staff two-step status, audit-logging CSV exports | **secret** — bypasses row-level security; server only |
 | `CREDENTIAL_KEYS` | encrypting server login details | `npm run key:gen`; **back it up** — without it stored passwords can't be recovered |
-| `CRON_SECRET` | `/api/cron/maintenance` — the **email sender** and the housekeeping fallback | call it every 5–10 minutes (Vercel Cron, GitHub Actions, cron-job.org): `curl -X POST $SITE/api/cron/maintenance -H "Authorization: Bearer $CRON_SECRET"` |
+| `CRON_SECRET` | `/api/cron/maintenance` — retries failed emails and runs the housekeeping fallback | min 24 characters. `vercel.json` calls it once a day (the most Vercel's Hobby plan allows); on Pro, or from GitHub Actions / cron-job.org, call it every 5–10 minutes: `curl -X POST $SITE/api/cron/maintenance -H "Authorization: Bearer $CRON_SECRET"` |
 | `UPSTASH_REDIS_REST_URL/TOKEN` | shared rate limits | falls back to in-memory — **per server instance, so set this before you run more than one** |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | bot protection on auth forms | set both or neither; without them sign-up and sign-in have no captcha |
-| `RESEND_API_KEY`, `EMAIL_FROM` | order/payment/ticket/staff emails | until set, emails stay queued (nothing is lost) |
+| `RESEND_API_KEY`, `EMAIL_FROM` | every email the app sends (order, payment, delivery, tickets, welcome, staff alerts) | until set, emails stay queued (nothing is lost). `EMAIL_FROM` must use a domain you verified in Resend |
+
+## Email (Resend)
+
+Two senders, one provider. Everything the **app** sends (order, payment, delivery, tickets, welcome, staff alerts) goes through Resend's API. The two emails **Supabase Auth** sends (confirm your address, reset your password) go through Resend's SMTP, so every message comes from the same verified domain.
+
+| When | Email | Sent by |
+|---|---|---|
+| Customer creates an account | **Confirm your email address** | Supabase Auth, over Resend SMTP (`supabase/templates/confirm-signup.html`) |
+| Customer confirms the address | **Welcome** (how ordering works, link to pick a plan) | the app |
+| "Forgot password" | **Reset your password** | Supabase Auth, over Resend SMTP (`reset-password.html`) |
+| Password reset or changed | **Your password was changed** (so an unwanted change is noticed) | the app |
+| Customer places an order | **We received your order** (with the pay link) | the app |
+| Customer submits proof | **We're checking your payment** | the app |
+| Admin approves / rejects the payment | **Payment verified** / **We couldn't verify your payment** | the app |
+| Admin delivers the server (order completed) | **Your server is ready** — a link to the dashboard, never the password | the app |
+| Renewal, expiring soon, expired, suspended, ticket reply | the matching notice | the app |
+| A customer submits payment proof, opens a ticket or uses the contact form | alert to admins / support | the app |
+
+The app's emails are queued by the database inside the same transaction as the event, so none can be lost, and are sent a few seconds after the response. If Resend is down, `/api/cron/maintenance` retries them (up to 5 attempts).
+
+**Set it up once**
+
+1. **Resend** → Domains → add your sending domain and add the DNS records it shows (SPF, DKIM). Wait until it says *Verified*. Then API Keys → create a key with **Sending access**.
+2. **Your host's environment** (e.g. Vercel → Settings → Environment Variables), then redeploy:
+   `RESEND_API_KEY=re_…` and `EMAIL_FROM="Cloud RDP VPS <no-reply@yourdomain.com>"` (an address on the verified domain). Also set `CRON_SECRET` (min 24 chars) so retries can run.
+3. **Supabase** → Authentication → SMTP Settings → enable custom SMTP:
+   host `smtp.resend.com`, port `465`, username `resend`, password = the same API key, sender = the address from `EMAIL_FROM`.
+4. **Supabase** → Authentication → Email Templates: paste each file from `supabase/templates/` and set the subject:
+
+   | Template | File | Subject |
+   |---|---|---|
+   | Confirm sign up | `confirm-signup.html` | Confirm your email address |
+   | Reset password | `reset-password.html` | Reset your password |
+   | Change email address | `change-email.html` | Confirm your new email address |
+   | Invite user | `invite.html` | You've been invited |
+   | Magic link | `magic-link.html` | Your sign-in link |
+   | Reauthentication | `reauthentication.html` | Your confirmation code |
+
+5. **Supabase** → Authentication → URL Configuration: Site URL = your live address, no trailing slash (the templates build their links from it).
+6. **Check it**: Admin → Settings → **Send test email**, then register a new account with a real address and confirm it. You should receive the confirmation email, then the welcome email.
 
 ## Supabase runbook
 
@@ -49,11 +89,9 @@ The project is already provisioned and migrated. For a **new** project: run `sup
 **Settings only the Supabase dashboard can change** (Authentication):
 
 1. **URL Configuration** → Site URL = your site (`http://localhost:3000` for development). Add redirect URLs: `http://localhost:3000/auth/confirm` and the production equivalent.
-2. **Email Templates** — use the `token_hash` form so links work on any device. Confirm signup:
-   `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup&next=/dashboard`
-   Reset password: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`
+2. **Email Templates** — paste the files from `supabase/templates/` (subject lines are in the comment at the top of each file). They link through `/auth/confirm` with a `token_hash`, so confirmation and reset links work on any device. Details in **Email (Resend)** above.
 3. **Sign In / Providers → Email**: keep "Confirm email" **on** (ordering requires a verified address) and set the minimum password length to **10** (the forms enforce it; this closes the direct-API route).
-4. **SMTP**: the built-in sender is for testing only and is heavily rate-limited — configure your own SMTP before launch.
+4. **SMTP**: the built-in sender is for testing only and is heavily rate-limited. Point it at Resend (see **Email (Resend)** above) so sign-up and password-reset emails are delivered.
 5. Optional: enable CAPTCHA protection with Turnstile, and leaked-password protection on plans that include it.
 6. **Multi-factor**: make sure TOTP is enabled (Authentication → Multi-Factor). Staff must enrol an authenticator to open `/admin` (the `require_staff_mfa` setting, on by default); customers can opt in under Settings → Security. If a project has TOTP disabled, `/admin/mfa` explains it and the setting can be switched off in Admin → Settings.
 7. **Realtime**: already enabled for the queue tables (migration `0010`) — the console counts update live.

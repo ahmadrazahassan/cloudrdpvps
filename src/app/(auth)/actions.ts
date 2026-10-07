@@ -5,6 +5,7 @@ import { z } from "zod";
 import { formAction, action } from "@/lib/action";
 import { fromAuthError } from "@/lib/auth/errors";
 import { clearPendingEmail, getPendingEmail, setPendingEmail } from "@/lib/auth/pending-email";
+import { drainSoon, enqueueEmail, queueWelcomeEmail } from "@/lib/email/queue";
 import { publicEnv } from "@/lib/env";
 import { AppError } from "@/lib/errors";
 import { rateLimit } from "@/lib/rate-limit";
@@ -79,8 +80,11 @@ export const register = formAction({
     });
     if (error) throw fromAuthError(error);
 
-    // "Confirm email" is off in this Supabase project: the user is already signed in.
-    if (data.session) redirect(destination);
+    // "Confirm email" is off in this Supabase project: the user is already signed in, so welcome them now.
+    if (data.session) {
+      if (data.user && (await queueWelcomeEmail({ id: data.user.id, email: address, name }))) drainSoon();
+      redirect(destination);
+    }
 
     await setPendingEmail(address);
     if (inline === "1") return { confirmEmail: true as const, email: address };
@@ -149,12 +153,14 @@ export const resetPassword = formAction({
   schema: z
     .object({ password: newPassword, confirm: z.string() })
     .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "The passwords don't match." }),
-  async handler({ password }, { supabase }) {
+  async handler({ password }, { supabase, user }) {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw fromAuthError(error);
     // Any other device that was signed in must sign in again with the new password.
     await supabase.auth.signOut({ scope: "others" });
     await clearPendingEmail();
+    // Tell them, so a reset they didn't ask for doesn't go unnoticed.
+    if (user && (await enqueueEmail({ userId: user.id, to: user.email, template: "password_changed" }))) drainSoon();
     redirect("/dashboard?notice=password-updated");
   },
 });

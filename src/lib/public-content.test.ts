@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { faqCategories, faqs as builtIn, homeFaqs } from "@/content/faqs";
 import { escapeHtml, renderEmail, type EmailContext } from "@/lib/email/templates";
@@ -17,6 +19,8 @@ describe("renderEmail", () => {
     ["service_expired", { service_id: "s1", label: "Web 01" }],
     ["expiring_soon", { service_id: "s1", label: "Web 01", expires_at: "2026-12-01T00:00:00Z", days: 3 }],
     ["account_suspended", { reason: "Abuse report" }],
+    ["welcome", { name: "Aisha Khan" }],
+    ["password_changed", {}],
     ["ticket_reply", { ticket_id: "t1", ticket_no: 48, subject: "Cannot connect" }],
     ["staff_payment_submitted", { payment_id: "p1", order_number: "CRV-1", amount_cents: 2500, method: "JazzCash", type: "new" }],
     ["staff_ticket", { ticket_id: "t1", ticket_no: 9, subject: "Help", is_new: true, priority: "high" }],
@@ -29,8 +33,23 @@ describe("renderEmail", () => {
     expect(mail).not.toBeNull();
     expect(mail!.subject.length).toBeGreaterThan(5);
     expect(mail!.text).toContain("Cloud RDP VPS");
-    if (name !== "test") expect(mail!.text).toMatch(/https:\/\/example\.com\/(dashboard|admin)/);
+    if (name !== "test") expect(mail!.text).toMatch(/https:\/\/example\.com\/(dashboard|admin|order|forgot-password)/);
     expect(mail!.html).toContain("<!doctype html>");
+  });
+
+  it("greets a new customer by first name and never mentions a password they'd receive", () => {
+    const mail = renderEmail("welcome", { name: "Aisha Khan" }, ctx)!;
+    expect(mail.subject).toBe("Welcome to Cloud RDP VPS");
+    expect(mail.text).toMatch(/^Hi Aisha, your account is ready\./);
+    expect(mail.text).toContain("https://example.com/order/new");
+    expect(renderEmail("welcome", {}, ctx)!.text).toMatch(/^Your account is ready\./); // no name on file: no "Hi ,"
+  });
+
+  it("uses a logo file that exists", () => {
+    const html = renderEmail("welcome", {}, ctx)!.html;
+    const src = /src="https:\/\/example\.com(\/brand\/[^"]+)"/.exec(html)?.[1];
+    expect(src, "the email has a logo").toBeTruthy();
+    expect(existsSync(path.join(process.cwd(), "public", src!))).toBe(true);
   });
 
   it("never asks for or includes a password, even if one is handed in by mistake", () => {

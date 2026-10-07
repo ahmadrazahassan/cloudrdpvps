@@ -1,8 +1,8 @@
 import "server-only";
-import { publicEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { loadEmailContext } from "./context";
 import { emailConfigured, sendEmail } from "./send";
-import { renderEmail, type EmailContext } from "./templates";
+import { renderEmail } from "./templates";
 
 const MAX_ATTEMPTS = 5;
 
@@ -24,13 +24,7 @@ export async function drainEmailOutbox(limit = 25): Promise<DrainResult> {
   if (!result.configured) return result;
 
   const db = createAdminClient();
-  const settings = await db.from("site_settings").select("key, value").in("key", ["support_email", "site_name"]);
-  const map = new Map((settings.data ?? []).map((r) => [r.key, r.value]));
-  const ctx: EmailContext = {
-    siteName: typeof map.get("site_name") === "string" ? (map.get("site_name") as string) : "Cloud RDP VPS",
-    siteUrl: publicEnv.siteUrl,
-    supportEmail: typeof map.get("support_email") === "string" ? (map.get("support_email") as string) : null,
-  };
+  const ctx = await loadEmailContext(db);
 
   const due = await db
     .from("email_outbox")

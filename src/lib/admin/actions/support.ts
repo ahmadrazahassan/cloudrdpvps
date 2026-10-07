@@ -17,6 +17,7 @@ const MAX_ATTACHMENTS = 3;
 /** A staff reply, or (internal=on) a note only staff can see. Files are sniffed server-side, same as the customer side. */
 export const replyToTicket = formAction({
   name: "admin-ticket-reply",
+  notifies: true,
   auth: "staff",
   rateLimit: { limit: 200, window: "1 h" },
   schema: z.object({

@@ -17,6 +17,7 @@ import { CONTACT_TOPICS } from "./topics";
  */
 export const submitContactForm = formAction({
   name: "contact",
+  notifies: true,
   auth: "public",
   captcha: true,
   rateLimit: { limit: 5, window: "1 h" },

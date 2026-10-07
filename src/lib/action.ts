@@ -2,6 +2,7 @@ import "server-only";
 import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { getStaffAal, needsSecondFactor } from "@/lib/auth/mfa";
+import { drainSoon } from "@/lib/email/queue";
 import { isAdmin, isStaff, getSessionUser, type SessionUser } from "@/lib/auth/session";
 import { isSupabaseConfigured } from "@/lib/env";
 import { AppError, ERROR_MESSAGES, type ErrorCode } from "@/lib/errors";
@@ -38,6 +39,11 @@ export interface ActionOptions<S extends z.ZodType, T> {
   captcha?: boolean;
   /** "skip" lets a session that hasn't passed its second factor call this (only password recovery needs that). */
   mfa?: "skip";
+  /**
+   * Set on actions that cause an email (placing an order, approving a payment, delivering a server…): the queued
+   * emails are sent right after the response, instead of waiting for the next scheduled run.
+   */
+  notifies?: boolean;
   handler: (input: z.output<S>, ctx: ActionContext) => Promise<T>;
 }
 
@@ -100,6 +106,10 @@ function createRunner<S extends z.ZodType, T>(opts: ActionOptions<S, T>) {
       if (!parsed.success) {
         return fail("VALIDATION", { fieldErrors: z.flattenError(parsed.error as z.ZodError).fieldErrors as FieldErrors });
       }
+
+      // Registered before the handler on purpose: Next runs it after the response even when the handler ends in
+      // redirect(), which is how most of these actions finish.
+      if (opts.notifies) drainSoon();
 
       const supabase = await createClient();
       const data = await opts.handler(parsed.data, { user, ip, supabase });

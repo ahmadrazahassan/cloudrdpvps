@@ -17,6 +17,7 @@ const refresh = () => revalidatePath("/admin", "layout");
  */
 export const approvePayment = action({
   name: "admin-approve-payment",
+  notifies: true,
   auth: "admin",
   rateLimit: { limit: 200, window: "1 h" },
   schema: z.object({ paymentId: uuid, received: z.string().trim().min(1, "Enter the amount you received.") }),
@@ -34,6 +35,7 @@ export const approvePayment = action({
 
 export const rejectPayment = action({
   name: "admin-reject-payment",
+  notifies: true,
   auth: "admin",
   rateLimit: { limit: 200, window: "1 h" },
   schema: z.object({

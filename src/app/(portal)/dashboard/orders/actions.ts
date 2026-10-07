@@ -25,6 +25,7 @@ const refresh = (orderId: string) => {
  */
 export const submitPaymentProof = formAction({
   name: "submit-payment",
+  notifies: true,
   auth: "user",
   rateLimit: { limit: 20, window: "1 h" },
   schema: z.object({

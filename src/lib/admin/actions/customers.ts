@@ -9,6 +9,7 @@ import { optionalText, uuid } from "@/lib/validation";
 
 export const setCustomerStatus = action({
   name: "admin-set-account-status",
+  notifies: true,
   auth: "admin",
   rateLimit: { limit: 60, window: "1 h" },
   schema: z.object({
