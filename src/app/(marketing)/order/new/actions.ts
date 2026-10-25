@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { action, formAction } from "@/lib/action";
+import { queueStaffOrderAlert } from "@/lib/email/queue";
 import { AppError, fromDbError } from "@/lib/errors";
 import { checkbox, optionalText, optionalUuid, uuid } from "@/lib/validation";
 
@@ -43,7 +44,7 @@ export const placeOrder = formAction({
     coupon: optionalText(40),
     terms: checkbox.refine((v) => v, "Please accept the Terms and the Acceptable Use Policy."),
   }),
-  async handler({ planId, locationId, renewServiceId, coupon }, { supabase }) {
+  async handler({ planId, locationId, renewServiceId, coupon }, { supabase, user }) {
     const { data, error } = await supabase.rpc("create_order", {
       p_plan_id: planId,
       p_location_id: locationId,
@@ -51,6 +52,8 @@ export const placeOrder = formAction({
       p_renew_service_id: renewServiceId,
     });
     if (error) throw fromDbError(error);
+    // The customer's email is queued by create_order; this queues the admins' one. Both go out via drainSoon.
+    await queueStaffOrderAlert({ ...data, customerEmail: user?.email });
     redirect(`/dashboard/orders/${data.id}/pay`);
   },
 });

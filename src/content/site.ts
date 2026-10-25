@@ -1,3 +1,5 @@
+import { publicEnv } from "@/lib/env";
+
 /**
  * Site-wide configuration. Anything the owner controls from the admin
  * dashboard later (support contacts, announcement banner, ETAs) lives here
@@ -9,7 +11,7 @@ export const site = {
   tagline: "Windows RDP & VPS, delivered by people.",
   description:
     "Dedicated Windows RDP and Windows VPS servers in countries around the world. Simple 30-day plans, flat dollar pricing, and every server set up by our team.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: publicEnv.siteUrl,
   year: 2026,
 
   /** Set from admin → Settings → General (site_settings). Null hides the item. */

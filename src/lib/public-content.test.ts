@@ -22,6 +22,7 @@ describe("renderEmail", () => {
     ["welcome", { name: "Aisha Khan" }],
     ["password_changed", {}],
     ["ticket_reply", { ticket_id: "t1", ticket_no: 48, subject: "Cannot connect" }],
+    ["staff_order_placed", { order_id: "o1", order_number: "CRV-1", total_cents: 2500, type: "new", plan: "RDP Starter", location: "United States", customer: "a@example.com" }],
     ["staff_payment_submitted", { payment_id: "p1", order_number: "CRV-1", amount_cents: 2500, method: "JazzCash", type: "new" }],
     ["staff_ticket", { ticket_id: "t1", ticket_no: 9, subject: "Help", is_new: true, priority: "high" }],
     ["staff_contact", { name: "Bilal", topic: "Sales" }],

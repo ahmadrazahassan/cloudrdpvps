@@ -13,9 +13,11 @@ const schema = z.object({
 });
 
 const blank = (v: string | undefined) => (v && v.trim() !== "" ? v.trim() : undefined);
+/** "www.example.com" is a common way to fill this in: treat a bare host as https instead of failing the build. */
+const withScheme = (v: string | undefined) => (v && !/^https?:\/\//i.test(v) ? `https://${v}` : v);
 
 const parsed = schema.safeParse({
-  siteUrl: blank(process.env.NEXT_PUBLIC_SITE_URL) ?? "http://localhost:3000",
+  siteUrl: withScheme(blank(process.env.NEXT_PUBLIC_SITE_URL)) ?? "http://localhost:3000",
   supabaseUrl: blank(process.env.NEXT_PUBLIC_SUPABASE_URL),
   supabaseAnonKey: blank(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   turnstileSiteKey: blank(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY),

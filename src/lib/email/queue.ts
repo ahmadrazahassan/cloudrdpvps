@@ -49,6 +49,50 @@ export async function queueWelcomeEmail(user: { id: string; email: string; name?
 }
 
 /**
+ * "New order" alert to every active admin (same opt-out as the database's staff alerts:
+ * profiles.notification_prefs.staff_alerts = false). The customer's own "we received your order" email is queued
+ * by `create_order` itself; this one tells the team. Never throws.
+ */
+export async function queueStaffOrderAlert(order: {
+  id: string;
+  order_number: string;
+  total_cents: number;
+  type: string;
+  plan_name: string;
+  location_name: string;
+  customerEmail?: string | null;
+}): Promise<number> {
+  try {
+    const db = createAdminClient();
+    const admins = await db.from("profiles").select("id, email, notification_prefs").eq("role", "admin").eq("status", "active");
+    if (admins.error) throw new Error(admins.error.message);
+    const rows = (admins.data ?? [])
+      .filter((p) => p.email && (p.notification_prefs as Record<string, unknown> | null)?.staff_alerts !== false)
+      .map((p) => ({
+        user_id: p.id,
+        to_email: p.email,
+        template: "staff_order_placed",
+        data: {
+          order_id: order.id,
+          order_number: order.order_number,
+          total_cents: order.total_cents,
+          type: order.type,
+          plan: order.plan_name,
+          location: order.location_name,
+          customer: order.customerEmail ?? "",
+        },
+      }));
+    if (!rows.length) return 0;
+    const { error } = await db.from("email_outbox").insert(rows);
+    if (error) throw new Error(error.message);
+    return rows.length;
+  } catch (error) {
+    console.error("[email:staff_order_placed]", error instanceof Error ? error.message : error);
+    return 0;
+  }
+}
+
+/**
  * Send whatever is due, right after the current response is finished (Next's `after`), so the person isn't kept
  * waiting on the email provider. Does nothing until RESEND_API_KEY and EMAIL_FROM are set — rows simply stay queued.
  * Called outside a request (a script, a test) it quietly does nothing and the scheduled run picks the rows up.

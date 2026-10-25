@@ -171,6 +171,16 @@ function draft(template: string, d: Record<string, unknown>, ctx: EmailContext):
         action: { label: "Reset your password", path: "/forgot-password" },
       };
     // ---- staff alerts (sent to admins / support; never include a customer's message text) ----
+    case "staff_order_placed":
+      return {
+        subject: `New order: ${order}${typeof d.total_cents === "number" ? ` (${usd(d.total_cents)})` : ""}`,
+        preheader: "A customer placed an order.",
+        heading: "New order",
+        lines: [`A customer placed ${d.type === "renewal" ? "a renewal" : "an order"}. It is waiting for their payment; you'll get another email when they submit proof.`],
+        facts: facts([["Order", order], ["Plan", str(d.plan)], ["Location", str(d.location)], ["Total", usd(d.total_cents)], ["Customer", str(d.customer)]]),
+        action: { label: "Open the order", path: `/admin/orders/${str(d.order_id)}` },
+        audience: "admin",
+      };
     case "staff_payment_submitted":
       return {
         subject: `Payment to review: ${order}${typeof d.amount_cents === "number" ? ` (${usd(d.amount_cents)})` : ""}`,
